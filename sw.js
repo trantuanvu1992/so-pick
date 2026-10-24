@@ -1,5 +1,5 @@
 /* Sổ Pick – lưu sẵn trang trên máy để mở tức thì. Dữ liệu (Apps Script) luôn lấy mới, không lưu ở đây. */
-const C = 'sopick-v3';
+const C = 'sopick-v4';
 const CORE = ['./', './index.html', './manifest.webmanifest', './icon-192.png', './icon-512.png', './icon-180.png', './icon.svg'];
 self.addEventListener('install', e => { self.skipWaiting(); e.waitUntil(caches.open(C).then(c => c.addAll(CORE)).catch(() => {})); });
 self.addEventListener('activate', e => e.waitUntil(caches.keys().then(ks => Promise.all(ks.filter(k => k !== C).map(k => caches.delete(k)))).then(() => self.clients.claim())));

@@ -396,6 +396,7 @@ button.prow{width:100%;text-align:left;font:inherit;color:inherit}
 .qs-manual{border-radius:16px;padding:4px 2px}.qs-manual summary{cursor:pointer;font-weight:700;font-size:13.5px;color:var(--primary);padding:8px 4px}
 .qs-manual[open]{display:flex;flex-direction:column;gap:10px}
 .mrow.queued .r-score::after{content:'⏳';position:absolute;top:-9px;left:-8px;font-size:12px}
+.fparts{display:flex;flex-wrap:wrap;gap:6px 12px;font-size:12.5px;color:var(--muted);margin:2px 0 8px}.fparts b{font-weight:800}
 .mf-teams{display:grid;grid-template-columns:1fr auto 1fr;gap:8px;align-items:end}.mf-teams .field{gap:6px}.mf-teams .inp{height:42px}.mf-vs{font-weight:800;color:var(--muted);padding-bottom:12px}
 .mrow .cbadge{height:20px;font-size:10.5px;max-width:58px;padding:0 6px}
 .r-no{font-weight:800;color:var(--muted);font-size:12px;text-align:center}
@@ -560,7 +561,7 @@ setTimeout(function(){if(!window.__SOPICK_END__){var v=document.getElementById('
 /* ====== CẤU HÌNH BẢN MOBILE ======
  * Dán link web app Apps Script (…/exec) vào giữa 2 dấu nháy dưới đây.
  * (Hoặc mở 1 lần: https://<tên>.github.io/<repo>/?api=<link …/exec> – app tự nhớ link trên máy đó.) */
-window.SOPICK_API = 'https://script.google.com/macros/s/AKfycbws6chM54TFRvv5Kroeg-wRW1qtLLQ5S678Rpmblbzuee4aUBQ44fZauyVN6dCayUY/exec';
+window.SOPICK_API = 'https://script.google.com/macros/s/AKfycbwgoUJMwejK8PvGMYBWgOiHxTmMc_fpkNHnCT_lul6Q5MqHm9d8BhPsrh1s4x_ZUD2w/exec';
 (function(){ try{ var q=new URLSearchParams(location.search).get('api');
   if(q&&/^https:\/\/script\.google\.com\/.+\/exec$/.test(q)){ localStorage.setItem('sopick_api',q); history.replaceState(null,'',location.pathname); }
   var saved=localStorage.getItem('sopick_api'); if(saved) window.SOPICK_API=saved; }catch(e){}
@@ -1046,6 +1047,29 @@ function fundOf(ledger,excludeSid){
   ledger.forEach(l=>{ if(excludeSid&&l.sessionId===excludeSid) return;
     if(l.type==='CHI') out+=l.amount; else if(l.status==='CHUA_DONG') pend+=l.amount; else paidIn+=l.amount; });
   return {paidIn,pend,out,balance:paidIn-out,expected:paidIn+pend-out};
+}
+/**
+ * Tách 2 túi tiền:
+ *  - CHỦ HỘI ỨNG (O): tiền sân/nước/chi buổi chủ hội trả trước + nợ cũ trước khi mở sổ, trừ phần mọi người đã trả lại (chia sân/nước, nợ đầu kỳ)
+ *    và phần quỹ tháng trả thay TV tháng (khi buổi đã chốt).
+ *  - QUỸ HỘI (F): tiền thua, quỹ tháng, dư làm tròn, thu/chi khác… = tiền sổ (N) + O − tiền gửi trước đang giữ hộ.
+ */
+function fundSplit(L){
+  L=L||S.boot.ledger; const ss={}; (S.boot.sessions||[]).forEach(x=>ss[x.id]=x);
+  const f=fundOf(L), by={}, done=l=>l.status!=='CHUA_DONG';
+  L.forEach(l=>{ if(!ss[l.sessionId]) return; const g=by[l.sessionId]||(by[l.sessionId]={cost:0,paid:0,all:0});
+    if(l.type==='CHI') g.cost+=l.amount; else if(l.category==='Chia sân/nước'){ g.all+=l.amount; if(done(l)) g.paid+=l.amount; } });
+  let O=0,Oexp=0,fundPay=0,surplus=0,surplusExp=0;
+  Object.entries(by).forEach(([sid,g])=>{ const x=ss[sid], fp=x.status==='CHOT'&&!isTrial(x)?((shareInfo(x)||{}).fund||0):0; fundPay+=fp;
+    O+=Math.max(0,g.cost-g.paid-fp); Oexp+=Math.max(0,g.cost-g.all-fp); surplus+=Math.max(0,g.paid+fp-g.cost); surplusExp+=Math.max(0,g.all+fp-g.cost); });
+  const sum=fn=>L.filter(fn).reduce((t,l)=>t+l.amount,0);
+  const adv=sum(l=>l.sessionId==='DK'&&l.type==='CHI'&&l.category==='Chủ hội ứng');
+  O+=Math.max(0,adv-sum(l=>l.sessionId==='DK'&&l.category==='Nợ đầu kỳ'&&done(l))); Oexp+=Math.max(0,adv-sum(l=>l.sessionId==='DK'&&l.category==='Nợ đầu kỳ'));
+  const dep=Object.values(creditsOf(L)).reduce((a,b)=>a+Math.max(0,b),0);
+  const F=f.balance+O-dep, Fexp=f.expected+Oexp-dep;
+  const parts={fines:sum(l=>l.type==='THU'&&l.category==='Tiền thua'&&done(l)),monthly:sum(l=>l.type==='THU'&&l.category==='Quỹ tháng'&&done(l)),surplus,fundPay};
+  parts.other=F-(parts.fines+parts.monthly+surplus-fundPay);
+  return {N:f.balance,O,Oexp,F,Fexp,dep,parts};
 }
 /** Tiền thua/người của 1 trận: giao lưu = 0; trận có mức riêng thì theo trận; còn lại theo buổi. */
 const matchFee=(s,m)=>m.mode==='GL'?0:(m.fee!=null&&m.fee!==''?+m.fee:(+s.fee||0));
@@ -2124,11 +2148,9 @@ function openClose(){
     const shareTotal=Object.values(sh.shares).reduce((a,b)=>a+b,0);
     const eqN=PAY.filter(p=>C.rules[p].mode==='eq').length, fundN=PAY.filter(p=>C.rules[p].mode==='fund').length;
     $('#cCalc').innerHTML=(C.enabled?`<span>Chia đều: <b>${kmoney(sh.per)}/người</b> × ${eqN} người${fundN?` · quỹ tháng trả thay ${fundN} TV tháng (${kmoney(sh.per*fundN)})`:''}${shareTotal-chi>0?` · làm tròn lên 1.000đ, dư <b>${kmoney(shareTotal-chi)}</b> vào quỹ`:''}</span>`:'')+
-      `<span>Trước buổi (nếu thu đủ nợ): <b>${fundPhrase(before.expected)}</b></span>
-       <span>+ Tiền thua: <b class="pos">${money(totalLose)}</b>${C.enabled?` · + Chia sân/nước: <b class="pos">${money(shareTotal)}</b>`:''}</span>
-       <span>− Chi sân, nước, khác: <b class="neg">${money(chi)}</b></span>
-       <span>= Sau buổi, thu đủ: <b>${fundPhrase(before.expected+totalLose+shareTotal-chi)}</b></span>
-       ${before.balance-chi<0?`<span class="sub">Quỹ không đủ trả sân → ${esc(ownerName())} ứng trước, mọi người trả nợ thì hoàn lại.</span>`:''}`;
+      (()=>{ const fp=C.enabled?sh.per*fundN:0, back=Math.min(chi,shareTotal+fp), dư=Math.max(0,shareTotal+fp-chi);
+        return `<span>💰 <b>Quỹ hội</b> buổi này: tiền thua <b class="pos">+${money(totalLose)}</b>${dư?` · dư làm tròn <b class="pos">+${money(dư)}</b>`:''}${fp?` · trả sân thay TV tháng <b class="neg">−${money(fp)}</b>`:''} = <b>${money(totalLose+dư-fp)}</b></span>
+       <span>🏸 <b>${esc(ownerName())}</b> ứng sân/nước <b class="neg">${money(chi)}</b> → được trả lại <b class="pos">${money(back)}</b> (mọi người chia${fp?' + quỹ tháng':''})${chi-back>0?` · còn tự chịu <b class="neg">${money(chi-back)}</b>`:''}</span>`; })();
   };
   openClose.C=C; openClose.upd=upd;
   ['#cSan','#cNuoc','#cKhac'].forEach(i=>$(i).oninput=()=>upd(false)); upd(true);
@@ -2241,6 +2263,7 @@ function debtsText(){
   const club=String(S.boot.settings.clubName||'Hội Pick').toUpperCase(), w=Math.max(...D.map(d=>d.name.length),4), aw=Math.max(...D.map(d=>kmoney(d.sum).length));
   const lines=[`💰 CÔNG NỢ ${club} | ${shortDate(todayStr())}`,...D.map((d,i)=>`${d.sum>0?'🔴':'🟢'} ${d.name.padEnd(w)}  ${kmoney(d.sum).padStart(aw)}`),
     '--------------------',`TỔNG NỢ: ${money(D.reduce((t,d)=>t+d.sum,0))}`];
+  { const FS=fundSplit(); lines.push('',`💰 Quỹ hội: ${FS.F<0?'−':''}${money(Math.abs(FS.F))} · ${ownerName()} đang ứng sân/nước: ${money(FS.O)}`); }
   const CR=Object.entries(creditsOf()).filter(([n,v])=>v>0); if(CR.length) lines.push('',`💳 Đang gửi trước: ${CR.map(([n,v])=>`${n} ${kmoney(v)}`).join(' · ')}`);
   const b=bankBlock(); if(b) lines.push('',b);
   const qu=qrUrl('',0); if(qu) lines.push(`📷 Mã QR chuyển khoản: ${qu}`);
@@ -2368,18 +2391,20 @@ function openMonthly(month){
 const ownerName=()=>S.boot?.settings?.owner||'Chủ hội';
 const fundPhrase=v=>v>=0?`Quỹ có ${money(v)}`:`${ownerName()} đang ứng ${money(-v)}`;
 function viewFund(){
-  const L=S.boot.ledger, f=fundOf(L), last=(S.boot.counts||[])[0], st=S.boot.settings;
+  const L=S.boot.ledger, f=fundOf(L), FS=fundSplit(L), last=(S.boot.counts||[])[0], st=S.boot.settings;
   const D=debtsOf(L), M=monthlyStatus(curMonth());
   const ratio=f.paidIn+f.pend?Math.round(f.paidIn*100/(f.paidIn+f.pend)):100;
   return `
   <section class="fund-hero glass">
-    <div class="eyebrow">${f.balance>=0?'Quỹ thực có':'Quỹ đang âm · '+esc(ownerName())+' ứng trước'}${st.startDate?` · sổ từ ${shortDate(st.startDate)}/${st.startDate.slice(0,4)}`:''}</div>
-    ${f.balance>=0?`<div class="big">${money(f.balance)}</div>`
-      :`<div class="owner-row">${avatar(ownerName(),44)}<div><div class="big neg">${money(-f.balance)}</div><div class="sub">Quỹ = 0đ · hội đang nợ ${esc(ownerName())} số này. Ai trả nợ thì tiền về ${esc(ownerName())} trước.</div></div></div>`}
+    <div class="eyebrow">Quỹ hội · tiền thua, quỹ tháng, dư làm tròn${st.startDate?` · sổ từ ${shortDate(st.startDate)}/${st.startDate.slice(0,4)}`:''}</div>
+    <div class="big ${FS.F<0?'neg':''}">${FS.F<0?'−':''}${money(Math.abs(FS.F))}</div>
+    <div class="fparts">${[['Tiền thua',FS.parts.fines],['Quỹ tháng',FS.parts.monthly],['Dư làm tròn',FS.parts.surplus],['Quỹ trả sân TV tháng',-FS.parts.fundPay],['Thu/chi khác',FS.parts.other]].filter(x=>x[1]).map(([l,v])=>`<span>${l} <b class="${v<0?'neg':'pos'}">${v<0?'−':'+'}${kmoney(Math.abs(v))}</b></span>`).join('')}</div>
+    <div class="owner-row">${avatar(ownerName(),40)}<div><div class="sub" style="margin:0">${esc(ownerName())} đang ứng tiền sân/nước</div><b class="${FS.O?'neg':'pos'}" style="font-size:22px">${FS.O?money(FS.O):'Đã được trả hết'}</b><div class="sub" style="margin:0">Mọi người trả phần chia sân/nước là trả lại cho ${esc(ownerName())}</div></div></div>
     <div class="fund-cmp">
-      <div><small>Nếu thu đủ công nợ</small><b class="${f.expected<0?'neg':'pos'}">${f.expected>=0?(f.balance<0?(f.expected?`Trả hết ${esc(ownerName())}, quỹ dư ${money(f.expected)}`:`Vừa đủ trả ${esc(ownerName())}`):`Quỹ ${money(f.expected)}`):`${esc(ownerName())} còn ứng ${money(-f.expected)}`}</b></div>
+      <div><small>Nếu thu đủ công nợ</small><b class="${FS.Fexp<0?'neg':'pos'}">${FS.Oexp?`${esc(ownerName())} còn ứng ${money(FS.Oexp)} · `:`${esc(ownerName())} được trả hết · `}quỹ hội ${FS.Fexp<0?'−':''}${money(Math.abs(FS.Fexp))}</b></div>
       <div><small>Mọi người còn nợ</small><b class="${f.pend?'neg':''}">${money(f.pend)}</b></div>
     </div>
+    ${FS.dep?`<div class="sub">💳 Ngoài ra đang giữ hộ tiền gửi trước của thành viên: ${money(FS.dep)} (không tính vào quỹ hội)</div>`:''}
     <div class="progress" title="Tỷ lệ đã thu"><i style="width:${ratio}%"></i></div>
     <div class="hero-meta"><span>Đã thu ${ratio}% các khoản phải thu</span></div>
     <div class="row-actions"><button class="btn filled sm" data-act="openCount"><span class="ms">calculate</span>Kiểm kê</button>
