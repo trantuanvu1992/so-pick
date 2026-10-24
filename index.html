@@ -561,10 +561,16 @@ setTimeout(function(){if(!window.__SOPICK_END__){var v=document.getElementById('
 /* ====== CẤU HÌNH BẢN MOBILE ======
  * Dán link web app Apps Script (…/exec) vào giữa 2 dấu nháy dưới đây.
  * (Hoặc mở 1 lần: https://<tên>.github.io/<repo>/?api=<link …/exec> – app tự nhớ link trên máy đó.) */
-window.SOPICK_API = 'https://script.google.com/macros/s/AKfycbxWvIuRkYq8oCpUvMFTkP9igbMK3_gCKfbaepufYJEvl-HdgLkx4uuulnPPJUIHqps/exec';
-(function(){ try{ var q=new URLSearchParams(location.search).get('api');
-  if(q&&/^https:\/\/script\.google\.com\/.+\/exec$/.test(q)){ localStorage.setItem('sopick_api',q); history.replaceState(null,'',location.pathname); }
-  var saved=localStorage.getItem('sopick_api'); if(saved) window.SOPICK_API=saved; }catch(e){}
+window.SOPICK_API = 'https://script.google.com/macros/s/AKfycbwgoUJMwejK8PvGMYBWgOiHxTmMc_fpkNHnCT_lul6Q5MqHm9d8BhPsrh1s4x_ZUD2w/exec';
+window.SOPICK_BUILD = '24/10/2026 11:55';
+(function(){ var FILE=window.SOPICK_API; window.SOPICK_FILE_API=FILE;
+  try{ var q=new URLSearchParams(location.search).get('api');
+    if(q&&/^https:\/\/script\.google\.com\/.+\/exec$/.test(q)){ localStorage.setItem('sopick_api',q); localStorage.setItem('sopick_api_base',FILE); history.replaceState(null,'',location.pathname); }
+    // link tự đổi trên máy chỉ dùng khi file trên GitHub CHƯA đổi link; file đổi link mới → bỏ link cũ trên máy
+    var saved=localStorage.getItem('sopick_api'), base=localStorage.getItem('sopick_api_base');
+    if(saved&&base===FILE) window.SOPICK_API=saved;
+    else if(saved){ localStorage.removeItem('sopick_api'); localStorage.removeItem('sopick_api_base'); localStorage.removeItem('sopick_cache_v1'); }
+  }catch(e){}
   if(!window.SOPICK_API) document.addEventListener('DOMContentLoaded',function(){ var v=document.getElementById('view'); if(v) v.innerHTML='<div style="margin:16px 0;padding:16px;border-radius:16px;background:#FFF1C2;color:#3D2E00;font:14px/1.5 system-ui"><b>Chưa có link máy chủ</b><br>Mở file index.html trên GitHub, dán link …/exec của Apps Script vào dòng window.SOPICK_API rồi lưu.</div>'; });
 })();
 </script>
@@ -2501,6 +2507,7 @@ function openSettings(){
       <button class="switch ${m.active?'on':''}" data-act="memToggle" data-id="${m.id}" data-on="${m.active?1:0}" aria-label="Thường trực: ${esc(m.name)}" title="Thường trực"></button></div>`).join('')}</div>
     <button class="btn filled" id="memSaveBtn" data-act="memSave" disabled><span class="ms">save</span>Lưu thay đổi thành viên</button>
     <div style="display:flex;gap:8px"><input class="inp" id="sNew" placeholder="Tên thành viên mới"><button class="btn filled" data-act="memAdd">Thêm</button></div>
+    <div class="sub" style="padding:8px 2px 0">${IS_API?`📱 Bản mobile (GitHub)${window.SOPICK_BUILD?` · cập nhật ${esc(window.SOPICK_BUILD)}`:''}<br>Máy chủ: <span class="mono">${esc(API_URL.replace(/^https:\/\/script\.google\.com\/macros\/s\//,'…/'))}</span>${window.SOPICK_FILE_API&&API_URL!==window.SOPICK_FILE_API?' (link đổi trên máy này)':''}`:IS_GAS?'💻 Bản web Apps Script':'Bản xem thử'}</div>
     ${IS_LIVE?'':'<button class="btn outline" data-act="demoReset"><span class="ms">restart_alt</span>Khôi phục dữ liệu mẫu</button>'}`);
   $('#sMe').onchange=e=>{S.me=e.target.value;store.set('sopick_me',S.me||null);render();};
   $('#sSave').onclick=()=>{const o={clubName:$('#sName').value.trim(),fee:+$('#sFee').value||0,minPer:+$('#sMin').value||15,duration:+$('#sDur').value||120,start:$('#sStart').value,courts:+$('#sCourts').value||1,
@@ -3016,7 +3023,7 @@ function showApiError(e){
 function changeApi(){
   const v=(prompt('Dán link web app Apps Script (đuôi /exec):',API_URL)||'').trim(); if(!v) return;
   if(!/^https:\/\/script\.google\.com\/.+\/exec$/.test(v)){ alert('Link phải bắt đầu bằng https://script.google.com/ và kết thúc bằng /exec'); return; }
-  store.set('sopick_api',v.replace(/\/u\/\d+\/s\//,'/s/')); store.set(CACHE_KEY,null); location.reload();
+  store.set('sopick_api',v.replace(/\/u\/\d+\/s\//,'/s/')); store.set('sopick_api_base',window.SOPICK_FILE_API||''); store.set(CACHE_KEY,null); location.reload();
 }
 function boot(){
   if(IS_API) return bootApi();
