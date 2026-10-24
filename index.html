@@ -16,7 +16,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&display=swap" media="print" onload="this.media='all'">
 <!-- chỉ tải đúng 68 biểu tượng app dùng (nhẹ hơn rất nhiều so với cả bộ) -->
-<link rel="stylesheet" id="iconFont" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400..600,0..1,0&icon_names=add,add_card,add_circle,auto_awesome,balance,bolt,calculate,calendar_month,campaign,casino,celebration,chair,check,check_circle,chevron_left,chevron_right,close,content_copy,delete,deselect,difference,done,done_all,edit,edit_note,egg,emoji_events,event_available,event_repeat,expand_less,fact_check,favorite,fitness_center,grid_view,handshake,history,hourglass_top,how_to_reg,image,ios_share,key_off,leaderboard,local_fire_department,lock,lock_open,manage_accounts,menu_book,military_tech,monitor_heart,north_east,payments,percent,person,person_remove,person_search,qr_code_2,radio_button_unchecked,redeem,remove_circle,restart_alt,save,savings,schedule,science,search,select_all,shuffle,south_west,sports_kabaddi,sports_tennis,star,swords,task_alt,trending_up,tune,undo,verified,view_agenda,view_list,volunteer_activism,warning,whatshot,wifi_off,workspace_premium&display=block" media="print" onload="this.media='all'">
+<link rel="stylesheet" id="iconFont" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400..600,0..1,0&icon_names=add,add_card,add_circle,auto_awesome,balance,bolt,calculate,calendar_month,campaign,casino,celebration,chair,check,check_circle,chevron_left,chevron_right,close,content_copy,delete,deselect,difference,done,done_all,edit,edit_note,egg,emoji_events,event_available,event_repeat,expand_less,fact_check,favorite,fitness_center,grid_view,handshake,history,hourglass_top,how_to_reg,image,ios_share,key_off,leaderboard,local_fire_department,lock,lock_open,manage_accounts,menu_book,military_tech,monitor_heart,north_east,payments,percent,person,person_remove,person_search,qr_code_2,radio_button_unchecked,redeem,refresh,remove_circle,restart_alt,save,savings,schedule,science,search,select_all,shuffle,south_west,sports_kabaddi,sports_tennis,star,swords,task_alt,trending_up,tune,undo,verified,view_agenda,view_list,volunteer_activism,warning,whatshot,wifi_off,workspace_premium&display=block" media="print" onload="this.media='all'">
 <style>
 /* Layout: one-column phone app (top bar, scrolling glass cards, M3 navigation bar); widens to a 2-column match grid on desktop. */
 :root{
@@ -2964,8 +2964,34 @@ function bootApi(){
   return call('api_open',S.sid||'').then(r=>{ S.boot=prepBoot(r.boot); S.ver=r.ver;
       if(r.current){ S.session=r.current.session; S.matches=sortM(r.current.matches); S.sid=S.session.id; S.mver=r.current.mver; store.set('sopick_sid',S.sid); }
       if(!sheetOpen()) render(); cupAutoFill(); saveCache(); })
-    .catch(e=>{ if(hadCache){ toast('Đang xem dữ liệu lưu trên máy · '+e.message); return; }
-      $('#view').innerHTML=`<div class="empty glass"><span class="ms">wifi_off</span><b>Không tải được dữ liệu</b><div class="sub">${esc(e.message)}</div><button class="btn filled" onclick="boot()">Thử lại</button></div>`; });
+    .catch(e=>{ if(hadCache){ toast('Đang xem dữ liệu lưu trên máy · '+e.message); return; } showApiError(e); });
+}
+/** Kiểm tra máy chủ bằng …/exec?ping=1 dạng JSONP (không bị chặn CORS) → biết lỗi do link, quyền truy cập hay do mạng. */
+function pingApi(){ return new Promise(res=>{ const cb='__sp'+Date.now(), sc=document.createElement('script'); let fin=false;
+  const done=r=>{ if(fin) return; fin=true; clearTimeout(t); try{delete window[cb];}catch(e){} sc.remove(); res(r); };
+  const t=setTimeout(()=>done('timeout'),12000); window[cb]=j=>done(j&&j.ok?(j.api?'ok':'old'):'bad');
+  sc.onerror=()=>done('error'); sc.onload=()=>setTimeout(()=>done('bad'),50);
+  sc.src=API_URL+(API_URL.includes('?')?'&':'?')+'ping=1&cb='+cb; document.head.appendChild(sc); }); }
+function showApiError(e){
+  const short=API_URL.replace(/^https:\/\/script\.google\.com\/macros\/(u\/\d+\/)?s\//,'…/s/');
+  const box=(diag)=>`<div class="empty glass" style="text-align:left;align-items:stretch"><div style="text-align:center"><span class="ms">wifi_off</span><b style="display:block">Không tải được dữ liệu</b><div class="sub">${esc(e.message)}</div></div>
+    <div class="sub">Link máy chủ đang dùng:<br><span class="mono">${esc(short)}</span></div>${diag}
+    <div class="row-actions" style="justify-content:center"><button class="btn filled" onclick="boot()"><span class="ms">refresh</span>Thử lại</button><button class="btn outline" onclick="changeApi()"><span class="ms">edit</span>Đổi link máy chủ</button></div></div>`;
+  $('#view').innerHTML=box('<div class="hint">Đang kiểm tra máy chủ…</div>');
+  pingApi().then(r=>{ const D={
+    ok:'<div class="hint ok">Máy chủ Apps Script <b>chạy bình thường</b>. Lỗi do mạng hoặc trình duyệt chặn (tiện ích chặn quảng cáo, chế độ tiết kiệm dữ liệu…). Thử tắt tiện ích chặn, mở bằng Chrome/Safari khác hoặc đổi Wi-Fi/4G rồi bấm Thử lại.</div>',
+    old:'<div class="hint warn">Máy chủ chạy nhưng là <b>Code.gs cũ</b> (chưa có cổng cho bản mobile). Dán Code.gs mới vào Apps Script → Triển khai → Quản lý triển khai → sửa → <b>Phiên bản mới</b>.</div>',
+    def:`<div class="hint bad"><b>Không gọi được máy chủ.</b> Kiểm tra lần lượt:<br>
+      1. <b>Link đúng chưa?</b> Apps Script → Triển khai → Quản lý triển khai → copy “URL ứng dụng web” (đuôi /exec) → bấm <b>Đổi link máy chủ</b> và dán vào.<br>
+      2. <b>Quyền truy cập</b> phải là <b>Bất kỳ ai</b> (không phải “Bất kỳ ai có tài khoản Google”).<br>
+      3. Đã dán <b>Code.gs mới</b> và triển khai <b>phiên bản mới</b> chưa.<br>
+      Thử nhanh: mở <span class="mono">${esc(API_URL)}?ping=1</span> trên trình duyệt – thấy chữ <b>"ok":true</b> là máy chủ đã đúng.</div>`};
+    $('#view').innerHTML=box(D[r]||D.def); });
+}
+function changeApi(){
+  const v=(prompt('Dán link web app Apps Script (đuôi /exec):',API_URL)||'').trim(); if(!v) return;
+  if(!/^https:\/\/script\.google\.com\/.+\/exec$/.test(v)){ alert('Link phải bắt đầu bằng https://script.google.com/ và kết thúc bằng /exec'); return; }
+  store.set('sopick_api',v.replace(/\/u\/\d+\/s\//,'/s/')); store.set(CACHE_KEY,null); location.reload();
 }
 function boot(){
   if(IS_API) return bootApi();
