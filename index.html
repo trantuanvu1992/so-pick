@@ -405,6 +405,23 @@ button.prow{width:100%;text-align:left;font:inherit;color:inherit}
 .od-row span{display:flex;flex-direction:column}.od-row small{color:var(--muted);font-size:11.5px}.od-row em{font-style:normal;font-size:11px;font-weight:700;color:#8a6d00}.od-row.ok b{color:var(--win)}
 .lg-who{height:36px;width:auto;max-width:200px;font-size:13px;padding:0 10px}
 .mo-nav{justify-content:center;margin-bottom:4px}
+.fsum{display:flex;flex-direction:column;gap:10px}
+.fsum-top{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px}
+.fcards{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+@media(min-width:760px){.fcards{grid-template-columns:repeat(4,minmax(0,1fr))}}
+.fcard{display:flex;flex-direction:column;align-items:flex-start;gap:3px;padding:14px;border-radius:20px;text-align:left;border:1px solid var(--glass-line);box-shadow:var(--shadow);min-width:0}
+.fcard small{font-size:12px;font-weight:700;color:var(--muted)}
+.fcard b{font-size:22px;font-weight:800;letter-spacing:-.01em;line-height:1.15;white-space:nowrap}
+.fcard>span{font-size:11.5px;color:var(--muted);line-height:1.3}
+.fcard:active{transform:scale(.98)}
+.c-fund{background:linear-gradient(135deg,#DDF5EC,#F2FBF7)}.c-fund b{color:#13724C}
+.c-neg{background:linear-gradient(135deg,#FDE3E1,#FFF4F3)}.c-neg b{color:#B3261E}
+.c-owner{background:linear-gradient(135deg,#FFEFD0,#FFF8EA)}.c-owner b{color:#8A4B00}
+.c-debt{background:linear-gradient(135deg,#FCE4EC,#FFF5F8)}.c-debt b{color:#A3264A}
+.c-after{background:linear-gradient(135deg,#E0EEFF,#F4F9FF)}.c-after b{color:#1B4F94}
+.fbar{display:block;width:100%;height:5px;border-radius:9px;background:rgba(0,0,0,.08);margin-top:4px;overflow:hidden}.fbar i{display:block;height:100%;background:#A3264A;border-radius:9px}
+.od-row.tot{border-top:2px solid var(--hair);border-bottom:0;font-weight:800;padding-top:8px;margin-top:2px}
+.fcard small,.fcard>span{color:#4F5B5D}
 .mon-head{margin:12px 0 4px;padding:2px 10px;font-weight:800;font-size:13px;color:var(--muted)}
 .srow.cur{background:color-mix(in srgb,var(--primary) 12%,transparent);outline:2px solid var(--primary);outline-offset:-2px}
 .lg-filters{display:flex;gap:8px;margin:-4px 0 4px}.lg-filters .lg-who{flex:1;max-width:none}
@@ -572,8 +589,8 @@ setTimeout(function(){if(!window.__SOPICK_END__){var v=document.getElementById('
 /* ====== CẤU HÌNH BẢN MOBILE ======
  * Dán link web app Apps Script (…/exec) vào giữa 2 dấu nháy dưới đây.
  * (Hoặc mở 1 lần: https://<tên>.github.io/<repo>/?api=<link …/exec> – app tự nhớ link trên máy đó.) */
-window.SOPICK_API = 'https://script.google.com/macros/s/AKfycbzYi0pTVPmEPYjL-kollIJ_hnfR9T2xxMON0wME1TCF1MmQpd-BFZYwBBVw7qrxq_gk/exec';
-window.SOPICK_BUILD = '26/10/2026 15:59';
+window.SOPICK_API = 'https://script.google.com/macros/s/AKfycbwADPV7P0z5tdS3jotiILErF3HKfY1NQrREnBI9sKxDpyDWP0kqo1D0kILbKMumAFvt/exec';
+window.SOPICK_BUILD = '26/10/2026 16:18';
 (function(){ var FILE=window.SOPICK_API; window.SOPICK_FILE_API=FILE;
   try{ var q=new URLSearchParams(location.search).get('api');
     if(q&&/^https:\/\/script\.google\.com\/.+\/exec$/.test(q)){ localStorage.setItem('sopick_api',q); localStorage.setItem('sopick_api_base',FILE); history.replaceState(null,'',location.pathname); }
@@ -2323,6 +2340,32 @@ function openDebt(name){
       <button class="btn filled big" data-act="payToggle" data-ids="${d.ids.join(',')}" data-paid="1" data-name="${esc(name)}" data-reopen="${esc(name)}"><span class="ms">done_all</span>Đã thu hết ${kmoney(d.sum)}</button></div>`);
 }
 
+
+/** Bấm thẻ ở tab Quỹ → chi tiết. */
+function openFundDetail(k){
+  const L=S.boot.ledger, FS=fundSplit(L), own=esc(ownerName()), P=FS.parts;
+  const row=(l,v,cls,sub)=>`<div class="od-row"><span>${l}${sub?`<small>${sub}</small>`:''}</span><b class="${cls||''}">${v}</b></div>`;
+  const sgn=v=>(v<0?'−':'+')+kmoney(Math.abs(v));
+  const srcs=()=>FS.srcs.map(x=>{ const dup=!x.dk&&FS.srcs.filter(y=>y.date===x.date&&!y.dk).length>1;
+    return row(`${x.dk?'Nợ cũ trước ngày mở sổ':`Buổi ${shortDate(x.date)}`}${x.dk?'':x.quyTra?' <em>quỹ tháng trả</em>':x.closed?'':' <em>chưa chốt</em>'}${dup?' <em class="neg">⚠️ trùng ngày</em>':''}`,
+      x.rem?kmoney(x.rem):'✓',x.rem?'neg':'pos',`ứng ${kmoney(x.cost)}${x.back?` · đã trả lại ${kmoney(x.back)}`:''}`); }).join('');
+  const T={
+    fund:['Quỹ hội', `${row('Tiền thua đã thu',sgn(P.fines),'pos')}${row('Quỹ tháng đã thu',sgn(P.monthly),'pos')}${P.surplus?row('Dư làm tròn tiền sân',sgn(P.surplus),'pos'):''}${P.fundPay?row('Quỹ trả tiền sân (sân tháng, TV tháng)',sgn(-P.fundPay),'neg'):''}${P.other?row('Thu / chi khác',sgn(P.other),P.other<0?'neg':'pos'):''}
+      <div class="od-row tot"><span>Quỹ hội</span><b class="${FS.F<0?'neg':'pos'}">${FS.F<0?'−':''}${money(Math.abs(FS.F))}</b></div>
+      <div class="sub">${FS.F<0?`Âm nghĩa là quỹ chưa đủ tiền trả sân → ${own} đang bỏ tiền ra trả thay phần này. Thu đủ quỹ tháng là hết âm.`:'Tiền của hội, dùng trả sân tháng, mua bóng, liên hoan…'}</div>`],
+    owner:[`${own} đang ứng`, `${srcs()}${FS.F<0?row('Ứng thay quỹ hội (quỹ chưa đủ trả sân)',kmoney(-FS.F),'neg'):''}
+      <div class="od-row tot"><span>Tổng ${own} đang bỏ ra</span><b class="neg">${money(FS.OT)}</b></div>
+      <div class="sub"><em>Chưa chốt</em>: tiền sân đã ghi khi tạo buổi, chốt buổi xong mới chia cho từng người. <em>Quỹ tháng trả</em>: tính vào quỹ hội.</div>`],
+    debt:['Mọi người còn nợ', `${debtsOf(L).map(d=>row(esc(d.name),kmoney(d.sum),'neg',d.groups.map(g=>esc(g.label)+' '+kmoney(g.sum)).join(' · '))).join('')}
+      <div class="od-row tot"><span>Tổng</span><b class="neg">${money(FS.pend)}</b></div>
+      ${row('→ vào quỹ hội',sgn(FS.Fexp-FS.F),'pos','quỹ tháng, tiền thua, dư làm tròn')}${row(`→ trả lại ${own}`,kmoney(FS.O-FS.Oexp),'','tiền sân/nước, nợ cũ')}
+      <button class="btn tonal" data-act="shareDebts"><span class="ms">campaign</span>Nhắc nợ cả hội</button>`],
+    after:['Khi mọi người trả đủ', `${row('Quỹ hội',`${FS.Fexp<0?'−':''}${money(Math.abs(FS.Fexp))}`,FS.Fexp<0?'neg':'pos',`hiện ${FS.F<0?'−':''}${kmoney(Math.abs(FS.F))} ${sgn(FS.Fexp-FS.F)}`)}
+      ${row(`${own} còn ứng`,FS.OTexp?money(FS.OTexp):'0đ',FS.OTexp?'neg':'pos',`hiện ${kmoney(FS.OT)} − được trả ${kmoney(FS.OT-FS.OTexp)}`)}
+      ${FS.OTexp?`<div class="sub">Phần ${own} còn ứng là tiền sân các buổi <b>chưa chốt</b> (chưa chia cho ai):</div>${FS.srcs.filter(x=>x.remExp).map(x=>row(x.dk?'Nợ cũ':`Buổi ${shortDate(x.date)}${x.closed?'':' <em>chưa chốt</em>'}`,kmoney(x.remExp),'neg')).join('')}<div class="sub">Chốt các buổi đó → mọi người nợ phần sân → trả xong là ${own} hết ứng.</div>`:''}`]
+  }[k];
+  openSheet(`<div class="sh-head"><h2>${T[0]}</h2><button class="icon-btn" data-act="closeSheet" aria-label="Đóng"><span class="ms">close</span></button></div><div class="owndet">${T[1]}</div>`);
+}
 /* ---------- tiền gửi trước + dư làm tròn ---------- */
 /** Số dư tiền gửi trước của từng người (đã trừ phần tự trừ vào nợ / hoàn lại). */
 function creditsOf(ledger){ const o={}; (ledger||S.boot.ledgerAll||S.boot.ledger).forEach(l=>{ if(l.type==='THU'&&DEP_CATS.includes(l.category)&&l.status!=='CHUA_DONG') o[l.person]=(o[l.person]||0)+l.amount; }); return o; }
@@ -2438,24 +2481,20 @@ function viewFund(){
   const D=debtsOf(L), M=monthlyStatus(curMonth());
   const ratio=f.paidIn+f.pend?Math.round(f.paidIn*100/(f.paidIn+f.pend)):100;
   return `
-  <section class="fund-hero glass">
-    <div class="eyebrow">Quỹ hội · tiền thua, quỹ tháng, dư làm tròn${st.startDate?` · sổ từ ${shortDate(st.startDate)}/${st.startDate.slice(0,4)}`:''}</div>
-    <div class="big ${FS.F<0?'neg':''}">${FS.F<0?'−':''}${money(Math.abs(FS.F))}</div>
-    <div class="fparts">${[['Tiền thua',FS.parts.fines],['Quỹ tháng',FS.parts.monthly],['Dư làm tròn',FS.parts.surplus],['Quỹ trả sân TV tháng',-FS.parts.fundPay],['Thu/chi khác',FS.parts.other]].filter(x=>x[1]).map(([l,v])=>`<span>${l} <b class="${v<0?'neg':'pos'}">${v<0?'−':'+'}${kmoney(Math.abs(v))}</b></span>`).join('')}</div>
-    <div class="owner-row">${avatar(ownerName(),40)}<div style="flex:1;min-width:0"><div class="sub" style="margin:0">${esc(ownerName())} đang ứng tiền sân/nước (tiền riêng, không phải quỹ)</div><b class="${FS.O?'neg':'pos'}" style="font-size:22px">${FS.O?money(FS.O):'Đã được trả hết'}</b>
-      ${FS.srcs.length?`<button class="btn text sm" data-act="ownDet">${S.ownDet?'Ẩn':'Xem'} chi tiết từng buổi</button>`:''}</div></div>
-    ${S.ownDet?`<div class="owndet">${FS.srcs.map(x=>{ const dup=!x.dk&&FS.srcs.filter(y=>y.date===x.date&&!y.dk).length>1;
-      return `<div class="od-row ${x.rem?'':'ok'}"><span>${x.dk?'Nợ cũ trước ngày mở sổ':`Buổi ${shortDate(x.date)}`}${x.dk?'':x.quyTra?' <em>quỹ tháng trả</em>':x.closed?'':' <em>chưa chốt</em>'}${dup?' <em class="neg">⚠️ trùng ngày</em>':''}<small>ứng ${kmoney(x.cost)}${x.back?` · đã trả lại ${kmoney(x.back)}`:''}</small></span><b>${x.rem?kmoney(x.rem):'✓ xong'}</b></div>`;}).join('')}
-      <div class="sub">Buổi <em>chưa chốt</em>: tiền sân đã ghi khi tạo buổi, mọi người chưa phải trả. Chốt buổi xong mới chia tiền sân cho từng người.</div></div>`:''}
-    ${FS.F<0?`<div class="hint warn">Quỹ hội đang âm ${money(-FS.F)}: quỹ chưa đủ tiền trả sân (đã tính tiền sân tháng quỹ phải trả) → ${esc(ownerName())} đang ứng thay quỹ số này. Tổng ${esc(ownerName())} đang bỏ ra: <b>${money(FS.OT)}</b>${FS.OTexp<FS.OT?` · thu đủ công nợ còn <b>${money(FS.OTexp)}</b>`:''}.</div>`:''}
-    <div class="fund-cmp one"><div><small>Mọi người còn nợ</small><b class="${FS.pend?'neg':''}">${money(FS.pend)}</b>
-      ${FS.pend?`<div class="sub" style="margin:4px 0 0">Thu đủ số này thì: <b>quỹ hội +${kmoney(FS.Fexp-FS.F)}</b> → ${money(FS.Fexp)} · <b>${esc(ownerName())} được trả lại ${kmoney(FS.O-FS.Oexp)}</b>${FS.Oexp?` → còn ứng ${money(FS.Oexp)} (tiền sân các buổi chưa chốt / chưa ai nợ)`:' → hết ứng'}</div>`:''}</div></div>
-    ${FS.dep?`<div class="sub">💳 Ngoài ra đang giữ hộ tiền gửi trước của thành viên: ${money(FS.dep)} (không tính vào quỹ hội)</div>`:''}
-    <div class="progress" title="Tỷ lệ đã thu"><i style="width:${ratio}%"></i></div>
-    <div class="hero-meta"><span>Đã thu ${ratio}% các khoản phải thu</span></div>
-    <div class="row-actions"><button class="btn filled sm" data-act="openCount"><span class="ms">calculate</span>Kiểm kê</button>
-      <button class="btn outline sm" data-act="fab"><span class="ms">add</span>Thu / Chi</button>
-      <button class="btn outline sm" data-act="openMonthly"><span class="ms">calendar_month</span>Quỹ tháng</button></div>
+  <section class="fsum">
+    <div class="fsum-top"><span class="eyebrow">Quỹ${st.startDate?` · sổ từ ${shortDate(st.startDate)}/${st.startDate.slice(0,4)}`:''}</span>
+      <div class="row-actions"><button class="btn tonal sm" data-act="openCount"><span class="ms">calculate</span>Kiểm kê</button><button class="btn outline sm" data-act="fab"><span class="ms">add</span>Thu / Chi</button><button class="btn outline sm" data-act="openMonthly"><span class="ms">calendar_month</span>Quỹ tháng</button></div></div>
+    <div class="fcards">
+      <button class="fcard ${FS.F<0?'c-neg':'c-fund'}" data-act="fDet" data-k="fund"><small>Quỹ hội</small><b>${FS.F<0?'−':''}${money(Math.abs(FS.F))}</b>
+        <span>${FS.F<0?'Chưa đủ trả sân tháng':'Tiền thua · quỹ tháng · dư'}</span></button>
+      <button class="fcard c-owner" data-act="fDet" data-k="owner"><small>${esc(ownerName())} đang ứng</small><b>${money(FS.OT)}</b>
+        <span>${FS.OT?`Sân/nước ${kmoney(FS.O)}${FS.F<0?` + thay quỹ ${kmoney(-FS.F)}`:''}`:'Không ứng gì'}</span></button>
+      <button class="fcard c-debt" data-act="fDet" data-k="debt"><small>Mọi người còn nợ</small><b>${money(FS.pend)}</b>
+        <span>${D.length} người · đã thu ${ratio}%</span><i class="fbar"><i style="width:${ratio}%"></i></i></button>
+      <button class="fcard c-after" data-act="fDet" data-k="after"><small>Khi thu đủ</small><b>${FS.Fexp<0?'−':''}${money(Math.abs(FS.Fexp))}</b>
+        <span>${FS.OTexp?`${esc(ownerName())} còn ứng ${kmoney(FS.OTexp)}`:`${esc(ownerName())} hết ứng`}</span></button>
+    </div>
+    ${FS.dep?`<div class="sub" style="padding:2px 6px">💳 Đang giữ hộ tiền gửi trước ${money(FS.dep)} (không tính vào quỹ)</div>`:''}
   </section>
   ${!st.startDate?`<button class="countcard glass" data-act="openBooks"><span class="licon wait"><span class="ms">menu_book</span></span>
     <div class="pname">Chưa mở sổ chính thức<small>Nhập tiền quỹ đang có + công nợ cũ từng người, chọn ngày bắt đầu quản lý</small></div><span class="ms">chevron_right</span></button>`:''}
@@ -3043,6 +3082,7 @@ const ACT={
   lgMore(){S.lgN=(S.lgN||40)+40;render();},
   lgGroup(t){openPayGroup(t.dataset.ids.split(','));},
   ownDet(){S.ownDet=!S.ownDet;render();},
+  fDet(t){openFundDetail(t.dataset.k);},
   lType(t){document.querySelectorAll('#lType button').forEach(b=>b.classList.toggle('on',b===t));},
   openSession(t){loadSession(t.dataset.id).then(()=>{S.tab='matches';render();window.scrollTo({top:0});});},
   pickSession(){const ss=S.boot?.sessions||[];openSheet(`<div class="sh-head"><h2>Chọn buổi</h2><button class="icon-btn" data-act="closeSheet" aria-label="Đóng"><span class="ms">close</span></button></div>
