@@ -94,8 +94,10 @@ h2{font-size:20px;font-weight:800;letter-spacing:-.01em;margin:0;text-wrap:balan
 h3{font-size:13px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin:6px 4px 0}
 .sub{color:var(--muted);font-size:13.5px}
 .status{font-size:12px;font-weight:700;padding:6px 10px;border-radius:99px;white-space:nowrap;display:inline-flex;gap:4px;align-items:center}
-.status.MO{background:var(--ball);color:var(--on-ball)}
-.status.CHOT{background:var(--primary-c);color:var(--on-primary-c)}
+.status.MO{background:#CDEFD0;color:#14532D}
+.status.CHOT{background:#FBE1E1;color:#9B2C2C}
+.status.LIVE{background:#FFE36E;color:#4A3B00;box-shadow:0 0 0 2px #FFD23F inset}
+.status.PAST{background:#FFE2C2;color:#7A3E00}
 .progress{height:8px;border-radius:99px;background:var(--hair);overflow:hidden}
 .progress i{display:block;height:100%;border-radius:99px;background:linear-gradient(90deg,var(--primary),color-mix(in srgb,var(--primary) 60%,var(--ball)))}
 .hero-meta{display:flex;flex-wrap:wrap;justify-content:space-between;gap:4px 12px;font-size:13px;color:var(--muted)}
@@ -402,6 +404,10 @@ button.prow{width:100%;text-align:left;font:inherit;color:inherit}
 .od-row{display:flex;justify-content:space-between;gap:8px;align-items:center;font-size:13.5px;padding:4px 0;border-bottom:1px dashed var(--hair)}
 .od-row span{display:flex;flex-direction:column}.od-row small{color:var(--muted);font-size:11.5px}.od-row em{font-style:normal;font-size:11px;font-weight:700;color:#8a6d00}.od-row.ok b{color:var(--win)}
 .lg-who{height:36px;width:auto;max-width:200px;font-size:13px;padding:0 10px}
+.mo-nav{justify-content:center;margin-bottom:4px}
+.mon-head{margin:12px 0 4px;padding:2px 10px;font-weight:800;font-size:13px;color:var(--muted)}
+.srow.cur{background:color-mix(in srgb,var(--primary) 12%,transparent);outline:2px solid var(--primary);outline-offset:-2px}
+.lg-filters{display:flex;gap:8px;margin:-4px 0 4px}.lg-filters .lg-who{flex:1;max-width:none}
 .mf-teams{display:grid;grid-template-columns:1fr auto 1fr;gap:8px;align-items:end}.mf-teams .field{gap:6px}.mf-teams .inp{height:42px}.mf-vs{font-weight:800;color:var(--muted);padding-bottom:12px}
 .mrow .cbadge{height:20px;font-size:10.5px;max-width:58px;padding:0 6px}
 .r-no{font-weight:800;color:var(--muted);font-size:12px;text-align:center}
@@ -567,7 +573,7 @@ setTimeout(function(){if(!window.__SOPICK_END__){var v=document.getElementById('
  * Dán link web app Apps Script (…/exec) vào giữa 2 dấu nháy dưới đây.
  * (Hoặc mở 1 lần: https://<tên>.github.io/<repo>/?api=<link …/exec> – app tự nhớ link trên máy đó.) */
 window.SOPICK_API = 'https://script.google.com/macros/s/AKfycbwADPV7P0z5tdS3jotiILErF3HKfY1NQrREnBI9sKxDpyDWP0kqo1D0kILbKMumAFvt/exec';
-window.SOPICK_BUILD = '26/10/2026 14:44';
+window.SOPICK_BUILD = '26/10/2026 15:59';
 (function(){ var FILE=window.SOPICK_API; window.SOPICK_FILE_API=FILE;
   try{ var q=new URLSearchParams(location.search).get('api');
     if(q&&/^https:\/\/script\.google\.com\/.+\/exec$/.test(q)){ localStorage.setItem('sopick_api',q); localStorage.setItem('sopick_api_base',FILE); history.replaceState(null,'',location.pathname); }
@@ -1015,7 +1021,7 @@ const Mock=(()=>{
       db.matches=db.matches.filter(q=>q.id!==mid);fixRest(s.id,[x.round]);renum(s.id);save();return {boot:boot(),current:getM(s.id)};},
     api_setCourtNames(sid,names,pn){pin(pn);db.sessions.find(s=>s.id===sid).courtNames=names;save();return getM(sid);},
     api_saveMembers(ch,pn){pin(pn);ch.forEach(c=>{const m=db.members.find(x=>x.id===c.id);if(!m)return;if(c.active!==undefined)m.active=c.active;if(c.monthly!==undefined)m.monthly=c.monthly;if(c.female!==undefined)m.female=c.female;});save();return boot();},
-    api_saveMonthly(month,amount,ch,pn,by){pin(pn);const key='QT-'+month,now=nowStr(),rm=new Set(ch.remove||[]);
+    api_saveMonthly(month,amount,ch,pn,by){pin(pn);const key='QT-'+month,now=nowStr(),rm=new Set(ch.remove||[]);unlink([...(ch.remove||[]),...(ch.unpaid||[])]);
       db.ledger.forEach(l=>{if(l.sessionId!==key||rm.has(l.id))return;if((ch.paid||[]).includes(l.id)){l.status='DA_DONG';l.at=now;}if((ch.unpaid||[]).includes(l.id)){l.status='CHUA_DONG';l.at=now;}});
       db.ledger=db.ledger.filter(l=>!rm.has(l.id));const have=new Set(db.ledger.filter(l=>l.sessionId===key).map(l=>l.person));
       (ch.add||[]).filter(n=>!have.has(n)).forEach(n=>db.ledger.push({id:id('L'),date:month+'-01',sessionId:key,type:'THU',category:'Quỹ tháng',person:n,amount:+amount||250000,status:(ch.addPaid||[]).includes(n)?'DA_DONG':'CHUA_DONG',note:'Tháng '+month.slice(5)+'/'+month.slice(0,4),by,at:now}));applyCredit(by);save();return boot();},
@@ -1071,10 +1077,11 @@ function fundSplit(L){
   L.forEach(l=>{ if(!ss[l.sessionId]) return; const g=by[l.sessionId]||(by[l.sessionId]={cost:0,paid:0,all:0});
     if(l.type==='CHI') g.cost+=l.amount; else if(l.category==='Chia sân/nước'){ g.all+=l.amount; if(done(l)) g.paid+=l.amount; } });
   let O=0,Oexp=0,fundPay=0,surplus=0,surplusExp=0; const srcs=[];
-  Object.entries(by).forEach(([sid,g])=>{ const x=ss[sid], fp=x.status==='CHOT'&&!isTrial(x)?((shareInfo(x)||{}).fund||0):0; fundPay+=fp;
+  Object.entries(by).forEach(([sid,g])=>{ const x=ss[sid], quyTra=x.share&&x.share.enabled===false&&!isTrial(x);
+    const fp=quyTra?g.cost:x.status==='CHOT'&&!isTrial(x)?((shareInfo(x)||{}).fund||0):0; fundPay+=fp; // tắt chia tiền = quỹ hội trả toàn bộ tiền sân (sân tháng)
     const rem=Math.max(0,g.cost-g.paid-fp), remExp=Math.max(0,g.cost-g.all-fp);
     O+=rem; Oexp+=remExp; surplus+=Math.max(0,g.paid+fp-g.cost); surplusExp+=Math.max(0,g.all+fp-g.cost);
-    if(g.cost) srcs.push({sid,date:x.date,closed:x.status==='CHOT',cost:g.cost,back:Math.min(g.cost,g.paid+fp),rem,remExp}); });
+    if(g.cost) srcs.push({sid,date:x.date,closed:x.status==='CHOT',quyTra,cost:g.cost,back:Math.min(g.cost,g.paid+fp),rem,remExp}); });
   const sum=fn=>L.filter(fn).reduce((t,l)=>t+l.amount,0);
   const adv=sum(l=>l.sessionId==='DK'&&l.type==='CHI'&&l.category==='Chủ hội ứng');
   const dkRem=Math.max(0,adv-sum(l=>l.sessionId==='DK'&&l.category==='Nợ đầu kỳ'&&done(l))), dkRemExp=Math.max(0,adv-sum(l=>l.sessionId==='DK'&&l.category==='Nợ đầu kỳ'));
@@ -1084,7 +1091,8 @@ function fundSplit(L){
   const F=f.balance+O-dep, Fexp=f.expected+Oexp-dep;
   const parts={fines:sum(l=>l.type==='THU'&&l.category==='Tiền thua'&&done(l)),monthly:sum(l=>l.type==='THU'&&l.category==='Quỹ tháng'&&done(l)),surplus,fundPay};
   parts.other=F-(parts.fines+parts.monthly+surplus-fundPay);
-  return {N:f.balance,O,Oexp,F,Fexp,dep,parts,srcs,pend:f.pend};
+  // quỹ hội âm = quỹ chưa đủ tiền trả sân → phần âm đó cũng là chủ hội đang ứng thay quỹ
+  return {N:f.balance,O,Oexp,F,Fexp,dep,parts,srcs,pend:f.pend,OT:O+Math.max(0,-F),OTexp:Oexp+Math.max(0,-Fexp)};
 }
 /** Tiền thua/người của 1 trận: giao lưu = 0; trận có mức riêng thì theo trận; còn lại theo buổi. */
 const matchFee=(s,m)=>m.mode==='GL'?0:(m.fee!=null&&m.fee!==''?+m.fee:(+s.fee||0));
@@ -1107,6 +1115,21 @@ const regularsFor=date=>{const ms=S.boot.members, mon=ms.filter(m=>monthlyOn(m.n
 /** Mặc định điểm danh: người đánh tháng của tháng đó; tháng chưa ai đăng ký thì chọn sẵn mọi thường trực. */
 const defaultAttend=date=>{const regs=regularsFor(date),mon=regs.filter(p=>monthlyOn(p,date));return new Set(mon.length?mon:regs);};
 const roundTime=(s,m)=>addMin(s.start,(m.round-1)*s.minPer);
+/** Trạng thái buổi để tô màu: CHOT đã chốt (đỏ nhạt) · LIVE đang đánh (vàng) · PAST quá ngày chưa chốt (cam) · MO sắp đánh/đang mở (xanh lá). */
+function sessState(s){
+  if(!s) return {k:'MO',t:'Đang mở'};
+  if(s.status==='CHOT') return {k:'CHOT',t:'Đã chốt'};
+  if(isTrial(s)) return {k:'TRIAL',t:'Tham khảo'};
+  const today=todayStr();
+  if(s.date===today){ const d=new Date(), now=d.getHours()*60+d.getMinutes(), st=hm2m(s.start);
+    if(now>=st-15&&now<=st+(s.duration||120)+45) return {k:'LIVE',t:'Đang đánh'};
+    return now<st?{k:'MO',t:'Hôm nay'}:{k:'PAST',t:'Chưa chốt'}; }
+  return s.date<today?{k:'PAST',t:'Chưa chốt'}:{k:'MO',t:'Sắp đánh'};
+}
+/** Màu theo tháng (ô ngày) – tháng liền nhau khác màu hẳn để dễ chọn buổi. */
+const MON_C=['#FFD6D6','#FFE0B8','#FFF0A8','#DDF5A8','#BFF0D2','#B8EEE8','#BFE0FF','#D2D6FF','#E6D2FF','#FFCBE6','#B9E4FF','#E2E2E2'];
+const monColor=d=>MON_C[(pd(d).getMonth())%12];
+const dateBox=s=>{ const x=pd(s.date); return `<span class="datebox" style="background:${monColor(s.date)};color:#1B1F20"><small>${DOW[x.getDay()]}</small><b>${x.getDate()}</b><small>Th${x.getMonth()+1}</small></span>`; };
 /** Tên nữ: đánh dấu ở thành viên (Cài đặt) + danh sách nữ lưu riêng của buổi (khách nữ). */
 const femaleSet=()=>new Set((S.boot?.members||[]).filter(m=>m.female).map(m=>m.name));
 const sessFemale=s=>new Set([...femaleSet(),...((s&&s.female)||[])]);
@@ -1178,7 +1201,7 @@ function viewMatches(){
     <div class="hero-top">
       <div style="min-width:0"><div class="eyebrow">Buổi đánh</div><h1>${dayLabel(s.date)}</h1>
         <div class="sub">${s.start}–${end} · ${s.players.length} người · ${s.courts} sân · ${s.fee?`thua ${kmoney(s.fee)}/người`:'đánh vui, không tính tiền'}${s.costSan?` · sân ${kmoney(s.costSan)}`:''}</div></div>
-      <span class="status ${s.status}">${s.status==='CHOT'?'<span class="ms" style="font-size:16px">lock</span>Đã chốt':'Đang đánh'}</span>
+      <span class="status ${sessState(s).k}">${s.status==='CHOT'?'<span class="ms" style="font-size:16px">lock</span>':''}${sessState(s).t}</span>
     </div>
     <div class="progress"><i style="width:${pct}%"></i></div>
     <div class="hero-meta"><span><b>${done}/${ms.length}</b> trận có tỷ số</span><span>${even}</span></div>
@@ -1196,6 +1219,7 @@ function viewMatches(){
   </section>
   <label class="search glass"><span class="ms">search</span><input id="q" type="search" autocomplete="off" placeholder="Gõ tên bạn: vu, đông, tuan…" value="${esc(S.q)}" aria-label="Tìm theo tên"><button class="icon-btn" data-act="clearQ" aria-label="Xóa" ${S.q?'':'hidden'} id="clearQ"><span class="ms">close</span></button></label>
   <div class="chips">${players.map(p=>`<button class="chip ${fold(p)===S.q?'on':''} ${p===S.me?'me':''}" data-act="qName" data-name="${esc(p)}">${p===S.me?'<span class="ms">person</span>':''}${esc(p)}</button>`).join('')}</div>
+  ${!ms.length&&s.status==='MO'?`<div class="hint">Buổi tạo sẵn, chưa có lịch. Đến hôm đánh bấm <b>Sửa buổi</b> → chọn người tham dự → app tự xếp lịch → Lưu.</div>`:''}
   <div id="mlist"></div>`;
 }
 
@@ -1452,9 +1476,9 @@ function viewHistory(){
   </tbody></table></div>`:'';
   return debtTbl+viewStats()+viewH2H()+`<h3>Các buổi đánh · ${ss.length}</h3>
   ${ss.length?`<div class="panel glass">${ss.map(s=>{const x=pd(s.date);const cost=s.costSan+s.costNuoc+s.costKhac;
-    return `<button class="srow" data-act="openSession" data-id="${s.id}"><span class="datebox"><small>${DOW[x.getDay()]}</small><b>${x.getDate()}</b><small>Th${x.getMonth()+1}</small></span>
+    return `<button class="srow" data-act="openSession" data-id="${s.id}">${dateBox(s)}
     <div class="pname">${s.players.length} người · ${s.doneCount}/${s.matchCount} trận<small>${s.status==='CHOT'||s.auto?`${s.fee?'Thua '+kmoney(s.totalIn):'Đánh vui'}${s.share?.enabled&&s.share.per?` · sân ${kmoney(s.share.per)}/ng`:''} · Chi ${kmoney(cost)}`:'Chưa nhập tiền sân'}</small></div>
-    <span class="status ${isTrial(s)?'TRIAL':s.status}">${isTrial(s)?'Tham khảo':s.status==='CHOT'?'Đã chốt':'Đang mở'}</span></button>`;}).join('')}</div>`:`<div class="empty glass"><span class="ms">history</span><b>Chưa có lịch sử</b></div>`}
+    <span class="status ${sessState(s).k}">${sessState(s).t}</span></button>`;}).join('')}</div>`:`<div class="empty glass"><span class="ms">history</span><b>Chưa có lịch sử</b></div>`}
   ${viewOldBook()}`;
 }
 
@@ -2063,7 +2087,7 @@ function openEdit(){
       <div class="field"><label>Tiền sân / nước đã trả (${esc(ownerName())} ứng)</label>
         <div class="grid3"><input class="inp" id="eSan" inputmode="numeric" value="${E.san||''}" placeholder="Sân" aria-label="Tiền sân"><input class="inp" id="eNuoc" inputmode="numeric" value="${E.nuoc||''}" placeholder="Nước" aria-label="Nước"><input class="inp" id="eKhac" inputmode="numeric" value="${E.khac||''}" placeholder="Khác" aria-label="Chi khác"></div>
         ${autoSan&&E.san!==autoSan?`<button class="btn text sm" data-act="eAutoSan">Dùng giờ sân × giá = ${kmoney(autoSan)}</button>`:''}</div>
-      <div class="mem" style="padding:2px 0"><div class="pname">Chia tiền sân/nước cho người tham dự<small>Tắt nếu quỹ/chủ hội trả hết</small></div><button class="switch ${E.share?'on':''}" data-act="eShare" aria-label="Chia tiền"></button></div>
+      <div class="mem" style="padding:2px 0"><div class="pname">Chia tiền sân/nước cho người tham dự<small>Tắt = <b>quỹ hội trả toàn bộ tiền sân</b> (vd tháng đã đóng quỹ tháng, sân thuê theo tháng)</small></div><button class="switch ${E.share?'on':''}" data-act="eShare" aria-label="Chia tiền"></button></div>
       <div class="field"><label>Người tham dự · ${E.players.size}${schedChanged()&&unplayed.length?` · <span class="neg">${unplayed.length} trận chưa đánh sẽ được xếp lại</span>`:''}</label>
         <input class="inp" data-filter="#eList" placeholder="Tìm tên…" style="height:40px">
         <div class="chip-grid" id="eList">${all.map(p=>`<button class="chip ${E.players.has(p)?'on':''}" data-act="eToggle" data-name="${esc(p)}">${E.players.has(p)?'<span class="ms">check</span>':''}${esc(p)}${monthlyOn(p,s.date)?'<small class="mtag">T</small>':''}</button>`).join('')}</div>
@@ -2078,7 +2102,7 @@ function openEdit(){
         <div class="share-top"><span class="pname">${esc(p)}<small>${monthlyOn(p,s.date)?'TV tháng':'Vãng lai'} · ${E.players.has(p)?`thua ${kmoney(lose[p]||0)}`:'chỉ góp tiền, không xếp trận'}</small></span><b>${kmoney((lose[p]||0)+(sh.shares[p]||0))}<small> = ${kmoney(lose[p]||0)} + ${kmoney(sh.shares[p]||0)}</small></b></div>
         ${E.share&&base?`<div class="seg mini">${[['eq','Chia đều'],['fixed','Vãng lai'],['free','Miễn'],...(monthlyOn(p,s.date)||r.mode==='fund'?[['fund','Quỹ tháng trả']]:[])].map(([m,l])=>`<button data-act="eMode" data-name="${esc(p)}" data-mode="${m}" class="${r.mode===m?'on':''}">${l}</button>`).join('')}
           ${r.mode==='fixed'?`<input class="inp fx" data-efx="${esc(p)}" inputmode="numeric" value="${r.amount}" aria-label="Số tiền cố định ${esc(p)}">`:''}</div>`:''}</div>`;}).join('')}</div>
-      ${schedChanged()&&unplayed.length&&!isCup(s)?(()=>{ if(!E.preview) E.preview=resched();
+      ${schedChanged()&&(unplayed.length||!S.matches.length)&&!isCup(s)?(()=>{ if(!E.preview) E.preview=resched();
         const maxK=Math.floor(ps.length/4), cnt={}; [...played,...E.preview].forEach(m=>[...m.a,...m.b].forEach(p=>{if(E.players.has(p))cnt[p]=(cnt[p]||0)+1;}));
         return `<div class="field"><label>Lịch mới cho ${E.preview.length} trận chưa đánh (trước: ${unplayed.length} trận)</label>
           ${maxK<s.courts?`<div class="hint warn">${ps.length} người chỉ đủ đánh <b>${maxK} sân</b> cùng lúc (mỗi sân cần 4 người) nên số trận ít hơn. Thêm người để chạy đủ ${s.courts} sân.</div>`:''}
@@ -2101,7 +2125,7 @@ function openEdit(){
     const patch={fee:E.fee,costs:{san:E.san,nuoc:E.nuoc,khac:E.khac,note:E.note},share:{enabled:E.share,rules:Object.fromEntries([...E.players,...E.extra].map(p=>[p,rule(p)])),extra:[...E.extra].filter(p=>!E.players.has(p))}};
     if(E.players.size<4){toast('Cần ít nhất 4 người');return;}
     if(playersChanged()) patch.players=[...E.players];
-    if(schedChanged()&&unplayed.length&&!isCup(s)){ if(!E.preview) E.preview=resched(); patch.matches=E.preview; patch.renumber=E.renum||[]; patch.freeSlots=E.free||[]; patch.freeK=E.K; }
+    if(schedChanged()&&(unplayed.length||!S.matches.length)&&!isCup(s)){ if(!E.preview) E.preview=resched(); patch.matches=E.preview; patch.renumber=E.renum||[]; patch.freeSlots=E.free||[]; patch.freeK=E.K; }
     else if(!exNow().length&&(s.freeSlots||[]).length){ patch.freeSlots=[]; patch.freeK=0; }
     needPin().then(pin=>call('api_updateSession',s.id,patch,pin,ensureMe())).then(r=>{S.boot=prepBoot(r.boot);S.session=r.current.session;S.matches=sortM(r.current.matches);closeSheet();render();toast('Đã lưu buổi · tiền đã chia lại');}).catch(fail);
   };
@@ -2347,48 +2371,52 @@ function monthlyStatus(month){
   const key='QT-'+month, rows=(S.boot.ledgerAll||S.boot.ledger).filter(l=>l.sessionId===key);
   const prev=monthRegs(shiftMonth(month,-1));
   const regs=prev?[...prev]:[]; // gợi ý: người đăng ký tháng trước
-  const created=new Set(rows.map(l=>l.person));
-  return {key,rows,regs,paid:rows.filter(l=>l.status==='DA_DONG'),missing:regs.filter(n=>!created.has(n)),
+  // gom theo người (1 người có thể có 2 dòng khi trừ 1 phần bằng tiền gửi trước)
+  const P={}; rows.forEach(l=>{ const x=P[l.person]||(P[l.person]={name:l.person,ids:[],paidIds:[],dueIds:[],amount:0,paidAmt:0,viaDep:false});
+    x.ids.push(l.id); x.amount+=l.amount; if(l.status==='DA_DONG'){ x.paidIds.push(l.id); x.paidAmt+=l.amount; if(viaDep(l)) x.viaDep=true; } else x.dueIds.push(l.id); });
+  const people=Object.values(P); people.forEach(x=>x.paid=!x.dueIds.length);
+  return {key,rows,people,byName:P,regs,paid:people.filter(x=>x.paid),missing:regs.filter(n=>!P[n]),
     sum:rows.reduce((t,l)=>t+l.amount,0),paidSum:rows.filter(l=>l.status==='DA_DONG').reduce((t,l)=>t+l.amount,0)};
 }
+/** Tháng mặc định khi mở Quỹ tháng: tháng sau nếu đã thu trước, không thì tháng này. */
+const moDefault=()=>{ const nx=shiftMonth(curMonth(),1); return monthStatusHas(nx)?nx:curMonth(); };
+const monthStatusHas=m=>(S.boot.ledgerAll||S.boot.ledger).some(l=>l.sessionId==='QT-'+m);
 function openMonthly(month){
-  month=month||curMonth();
-  const st=S.boot.settings, M=monthlyStatus(month);
-  const byName={}; M.rows.forEach(l=>byName[l.person]=l);
-  const people=[...new Set([...S.boot.members.filter(m=>m.active).map(m=>m.name),...M.rows.map(l=>l.person)])];
+  month=month||moDefault();
+  const st=S.boot.settings, M=monthlyStatus(month), byName=M.byName;
+  const people=[...new Set([...M.people.map(x=>x.name),...S.boot.members.filter(m=>m.active).map(m=>m.name),...S.boot.members.map(m=>m.name)])];
   // trạng thái mong muốn (sửa thoải mái, chỉ gửi lên khi bấm Lưu)
-  const reg=new Set(M.rows.length?M.rows.map(l=>l.person):M.missing);
-  const paid=new Set(M.rows.filter(l=>l.status==='DA_DONG').map(l=>l.person));
-  const O={month,mode:'reg',reg,paid};
+  const reg=new Set(M.people.length?M.people.map(x=>x.name):M.missing);
+  const paid=new Set(M.paid.map(x=>x.name));
+  const O={month,mode:'cycle',reg,paid};
   const chipHTML=()=>people.map(n=>{
-    const r=reg.has(n), p=r&&paid.has(n), was=byName[n], wasP=was&&was.status==='DA_DONG';
+    const r=reg.has(n), p=r&&paid.has(n), was=byName[n], wasP=was&&was.paid;
     const changed=(!!was)!==r||(r&&wasP!==p);
     return `<button class="chip mo ${r?(p?'reg':'reg unpaid'):''} ${changed?'changed':''}" data-act="moTap" data-name="${esc(n)}">${r?`<span class="ms ${p?'fill':''}">${p?'task_alt':'schedule'}</span>`:''}${esc(n)}${r?(p?' · đã đóng':' · chưa đóng'):''}</button>`;}).join('');
   const diff=()=>{
     const add=[...reg].filter(n=>!byName[n]), addPaid=add.filter(n=>paid.has(n));
-    const remove=M.rows.filter(l=>!reg.has(l.person));
-    const keep=M.rows.filter(l=>reg.has(l.person));
-    return {add,addPaid,remove,paidIds:keep.filter(l=>l.status!=='DA_DONG'&&paid.has(l.person)).map(l=>l.id),
-      unpaidIds:keep.filter(l=>l.status==='DA_DONG'&&!paid.has(l.person)).map(l=>l.id)};
+    const removeP=M.people.filter(x=>!reg.has(x.name)), keep=M.people.filter(x=>reg.has(x.name));
+    return {add,addPaid,remove:removeP.flatMap(x=>x.ids.map(id=>({id,person:x.name,status:x.paidIds.includes(id)?'DA_DONG':'CHUA_DONG'}))),removeP,
+      paidIds:keep.filter(x=>paid.has(x.name)).flatMap(x=>x.dueIds), unpaidIds:keep.filter(x=>!paid.has(x.name)).flatMap(x=>x.paidIds),
+      nPaid:keep.filter(x=>paid.has(x.name)&&x.dueIds.length).length, nUnpaid:keep.filter(x=>!paid.has(x.name)&&x.paidIds.length).length};
   };
   const refresh=()=>{
     $('#moList').innerHTML=chipHTML();
     const f=document.querySelector('[data-filter="#moList"]'); if(f&&f.value) f.dispatchEvent(new Event('input',{bubbles:true}));
-    document.querySelectorAll('#moMode button').forEach(b=>b.classList.toggle('on',b.dataset.v===O.mode));
-    const d=diff(), amt=parseInt(($('#moAmt').value||'').replace(/\D/g,''),10)||0, n=d.add.length+d.remove.length+d.paidIds.length+d.unpaidIds.length;
-    const paidRemoved=d.remove.filter(l=>l.status==='DA_DONG').length;
+    const d=diff(), amt=parseInt(($('#moAmt').value||'').replace(/\D/g,''),10)||0, n=d.add.length+d.removeP.length+d.nPaid+d.nUnpaid;
+    const paidRemoved=d.removeP.filter(x=>x.paidIds.length).length;
     $('#moSum').innerHTML=`<span>Tháng ${monthLabel(month)}: <b>${reg.size}</b> người đánh tháng · <b>${[...reg].filter(x=>paid.has(x)).length}</b> đã đóng · còn thu <b>${kmoney([...reg].filter(x=>!paid.has(x)).length*(amt||st.monthlyFee))}</b></span>
-      ${n?`<span>Thay đổi: ${[d.add.length?`+${d.add.length} đăng ký (${d.add.map(esc).join(', ')})`:'',d.remove.length?`−${d.remove.length} hủy (${d.remove.map(l=>esc(l.person)).join(', ')})`:'',d.paidIds.length?`${d.paidIds.length} → đã đóng`:'',d.unpaidIds.length?`${d.unpaidIds.length} → chưa đóng`:''].filter(Boolean).join(' · ')}</span>`:'<span class="sub">Chưa có thay đổi</span>'}
-      ${paidRemoved?`<span class="neg">Có ${paidRemoved} người đã đóng tiền bị hủy – tiền đó sẽ bị gỡ khỏi quỹ.</span>`:''}`;
+      ${n?`<span>Thay đổi: ${[d.add.length?`+${d.add.length} đăng ký (${d.add.map(esc).join(', ')})`:'',d.removeP.length?`−${d.removeP.length} hủy (${d.removeP.map(x=>esc(x.name)).join(', ')})`:'',d.nPaid?`${d.nPaid} → đã đóng`:'',d.nUnpaid?`${d.nUnpaid} → chưa đóng`:''].filter(Boolean).join(' · ')}</span>`:''}
+      ${paidRemoved?`<span class="neg">Có ${paidRemoved} người đã đóng tiền bị hủy – tiền đó sẽ bị gỡ khỏi quỹ (tiền gửi trước, nếu có, được trả lại).</span>`:''}`;
     $('#moGo').disabled=!n; $('#moGo').innerHTML=`<span class="ms">save</span>${n?`Lưu ${n} thay đổi`:'Lưu'}`;
   };
   openSheet(`<div class="sh-head"><div><h2>Đăng ký tháng ${monthLabel(month)}</h2><div class="sub">Chọn nhanh nhiều người rồi bấm Lưu 1 lần. Ai không đăng ký là vãng lai.</div></div><button class="icon-btn" data-act="closeSheet" aria-label="Đóng"><span class="ms">close</span></button></div>
+    <div class="stepnav mo-nav"><button class="icon-btn" data-act="moNav" data-d="-1" aria-label="Tháng trước"><span class="ms">chevron_left</span></button><b>Tháng ${monthLabel(month)}</b><button class="icon-btn" data-act="moNav" data-d="1" aria-label="Tháng sau"><span class="ms">chevron_right</span></button></div>
     <div class="grid2"><div class="field"><label for="moMonth">Tháng</label><input class="inp" type="month" id="moMonth" value="${month}"></div>
       <div class="field"><label for="moAmt">Mỗi người</label><input class="inp" id="moAmt" inputmode="numeric" value="${M.rows[0]?.amount||st.monthlyFee||250000}"></div></div>
-    <div class="field"><label>Bấm tên để</label>
-      <div class="seg" id="moMode"><button data-act="moMode" data-v="reg" class="on"><span class="ms">how_to_reg</span> Đăng ký / hủy</button><button data-act="moMode" data-v="pay"><span class="ms">payments</span> Đánh dấu đã đóng</button></div></div>
+    <div class="hint">Bấm tên để đổi lần lượt: <b>chưa đăng ký</b> → <b>đăng ký · chưa đóng</b> → <b>đã đóng</b> → bỏ đăng ký. Bấm <b>Lưu</b> 1 lần khi xong.</div>
     <div class="row-actions"><button class="btn tonal sm" data-act="moAll" data-v="1"><span class="ms">select_all</span>Chọn tất cả</button><button class="btn outline sm" data-act="moAll" data-v="0"><span class="ms">deselect</span>Bỏ hết</button>
-      <button class="btn text sm" data-act="moFlag"><span class="ms">history</span>Như tháng trước</button></div>
+      <button class="btn text sm" data-act="moFlag"><span class="ms">history</span>Như tháng trước</button><button class="btn text sm" data-act="moAllPaid"><span class="ms">done_all</span>Tất cả đã đóng</button></div>
     <input class="inp" data-filter="#moList" placeholder="Tìm tên…" style="height:40px">
     <div class="chip-grid" id="moList"></div>
     <div class="calc" id="moSum"></div>
@@ -2417,8 +2445,9 @@ function viewFund(){
     <div class="owner-row">${avatar(ownerName(),40)}<div style="flex:1;min-width:0"><div class="sub" style="margin:0">${esc(ownerName())} đang ứng tiền sân/nước (tiền riêng, không phải quỹ)</div><b class="${FS.O?'neg':'pos'}" style="font-size:22px">${FS.O?money(FS.O):'Đã được trả hết'}</b>
       ${FS.srcs.length?`<button class="btn text sm" data-act="ownDet">${S.ownDet?'Ẩn':'Xem'} chi tiết từng buổi</button>`:''}</div></div>
     ${S.ownDet?`<div class="owndet">${FS.srcs.map(x=>{ const dup=!x.dk&&FS.srcs.filter(y=>y.date===x.date&&!y.dk).length>1;
-      return `<div class="od-row ${x.rem?'':'ok'}"><span>${x.dk?'Nợ cũ trước ngày mở sổ':`Buổi ${shortDate(x.date)}`}${x.dk?'':x.closed?'':' <em>chưa chốt</em>'}${dup?' <em class="neg">⚠️ trùng ngày</em>':''}<small>ứng ${kmoney(x.cost)}${x.back?` · đã trả lại ${kmoney(x.back)}`:''}</small></span><b>${x.rem?kmoney(x.rem):'✓ xong'}</b></div>`;}).join('')}
+      return `<div class="od-row ${x.rem?'':'ok'}"><span>${x.dk?'Nợ cũ trước ngày mở sổ':`Buổi ${shortDate(x.date)}`}${x.dk?'':x.quyTra?' <em>quỹ tháng trả</em>':x.closed?'':' <em>chưa chốt</em>'}${dup?' <em class="neg">⚠️ trùng ngày</em>':''}<small>ứng ${kmoney(x.cost)}${x.back?` · đã trả lại ${kmoney(x.back)}`:''}</small></span><b>${x.rem?kmoney(x.rem):'✓ xong'}</b></div>`;}).join('')}
       <div class="sub">Buổi <em>chưa chốt</em>: tiền sân đã ghi khi tạo buổi, mọi người chưa phải trả. Chốt buổi xong mới chia tiền sân cho từng người.</div></div>`:''}
+    ${FS.F<0?`<div class="hint warn">Quỹ hội đang âm ${money(-FS.F)}: quỹ chưa đủ tiền trả sân (đã tính tiền sân tháng quỹ phải trả) → ${esc(ownerName())} đang ứng thay quỹ số này. Tổng ${esc(ownerName())} đang bỏ ra: <b>${money(FS.OT)}</b>${FS.OTexp<FS.OT?` · thu đủ công nợ còn <b>${money(FS.OTexp)}</b>`:''}.</div>`:''}
     <div class="fund-cmp one"><div><small>Mọi người còn nợ</small><b class="${FS.pend?'neg':''}">${money(FS.pend)}</b>
       ${FS.pend?`<div class="sub" style="margin:4px 0 0">Thu đủ số này thì: <b>quỹ hội +${kmoney(FS.Fexp-FS.F)}</b> → ${money(FS.Fexp)} · <b>${esc(ownerName())} được trả lại ${kmoney(FS.O-FS.Oexp)}</b>${FS.Oexp?` → còn ứng ${money(FS.Oexp)} (tiền sân các buổi chưa chốt / chưa ai nợ)`:' → hết ứng'}</div>`:''}</div></div>
     ${FS.dep?`<div class="sub">💳 Ngoài ra đang giữ hộ tiền gửi trước của thành viên: ${money(FS.dep)} (không tính vào quỹ hội)</div>`:''}
@@ -2430,9 +2459,10 @@ function viewFund(){
   </section>
   ${!st.startDate?`<button class="countcard glass" data-act="openBooks"><span class="licon wait"><span class="ms">menu_book</span></span>
     <div class="pname">Chưa mở sổ chính thức<small>Nhập tiền quỹ đang có + công nợ cũ từng người, chọn ngày bắt đầu quản lý</small></div><span class="ms">chevron_right</span></button>`:''}
-  ${(M.regs.length||M.rows.length)?`<button class="countcard glass" data-act="openMonthly"><span class="licon ${M.rows.length&&M.paid.length===M.rows.length&&!M.missing.length?'in':'wait'}"><span class="ms">calendar_month</span></span>
-    <div class="pname">Đăng ký tháng ${monthLabel(curMonth())} · ${M.rows.length} người · ${kmoney(st.monthlyFee)}/người<small>${M.rows.length?`Đã đóng ${M.paid.length}/${M.rows.length} · ${kmoney(M.paidSum)}/${kmoney(M.sum)}`:'Chưa tạo khoản thu tháng này'}${!M.rows.length&&M.missing.length?` · gợi ý ${M.missing.length} người`:''}</small></div>
-    <span class="ms">chevron_right</span></button>`:''}
+  ${[curMonth(),shiftMonth(curMonth(),1)].map((mk,i)=>{ const M=monthlyStatus(mk); if(i&&!M.people.length) return ''; if(!i&&!M.regs.length&&!M.people.length) return '';
+    return `<button class="countcard glass" data-act="openMonthly" data-m="${mk}"><span class="licon ${M.people.length&&M.paid.length===M.people.length?'in':'wait'}"><span class="ms">calendar_month</span></span>
+    <div class="pname">Đăng ký tháng ${monthLabel(mk)}${i?' (thu trước)':''} · ${M.people.length} người · ${kmoney(M.rows[0]?.amount||st.monthlyFee)}/người<small>${M.people.length?`Đã đóng ${M.paid.length}/${M.people.length} · ${kmoney(M.paidSum)}/${kmoney(M.sum)}${M.people.length>M.paid.length?` · chưa đóng: ${M.people.filter(x=>!x.paid).map(x=>esc(x.name)).join(', ')}`:''}`:'Chưa tạo khoản thu tháng này'}${!M.people.length&&M.missing.length?` · gợi ý ${M.missing.length} người`:''}</small></div>
+    <span class="ms">chevron_right</span></button>`; }).join('')}
   ${last?`<button class="countcard glass" data-act="openCount"><span class="licon ${last.diff===0?'in':last.diff>0?'wait':'out'}"><span class="ms">${last.diff===0?'verified':'difference'}</span></span>
     <div class="pname">Kiểm kê gần nhất · ${shortDate(last.date)}<small>Đếm ${money(last.total)} · Sổ ${money(last.book)}${last.adjusted?' · đã điều chỉnh sổ':''}</small></div>
     <b class="${last.diff===0?'pos':last.diff>0?'':'neg'}">${last.diff===0?'Khớp':(last.diff>0?'+':'−')+kmoney(Math.abs(last.diff))}</b></button>`:''}
@@ -2469,20 +2499,22 @@ function flowItems(L){
 }
 const lgLabel=l=>`${l.category==='Chia sân/nước'?'Sân/nước':l.category}${l.sessionId&&!['DK','GT'].includes(l.sessionId)&&!String(l.sessionId).startsWith('QT-')?' '+shortDate(l.date):''}${l.sessionId==='DK'&&l.note?' ('+l.note+')':''}`;
 function viewLedger(L){
-  const mode=S.lgMode||'flow', who=S.lgWho||'', n=S.lgN||40;
+  const mode=S.lgMode||'flow', who=S.lgWho||'', n=S.lgN||40, mon=S.lgMon||'';
   const people=[...new Set(L.map(l=>l.person).filter(Boolean))].sort((a,b)=>a.localeCompare(b));
+  const months=[...new Set(L.map(l=>(l.status==='DA_DONG'&&l.type==='THU'?lgWhen(l):l.date).slice(0,7)).filter(m=>/^\d{4}-\d{2}$/.test(m)))].sort().reverse();
+  const inMon=w=>!mon||String(w).slice(0,7)===mon;
   let rows=[];
   if(who){ // lịch sử 1 người: mọi khoản (phải đóng, đã đóng lúc nào, trừ tiền gửi, gửi trước, tiền ứng)
-    rows=L.filter(l=>l.person===who&&!(l.category==='Trừ tiền gửi')).map(l=>({l,when:l.status==='CHUA_DONG'?l.date:lgWhen(l)})).sort((a,b)=>b.when.localeCompare(a.when));
-  } else if(mode==='due') rows=L.filter(l=>l.type==='THU'&&l.status==='CHUA_DONG').sort((a,b)=>b.date.localeCompare(a.date)).map(l=>({l,when:l.date}));
-  else rows=flowItems(L).filter(x=>mode==='flow'||x.kind===mode);
+    rows=L.filter(l=>l.person===who&&!(l.category==='Trừ tiền gửi')).map(l=>({l,when:l.status==='CHUA_DONG'||l.type==='CHI'?l.date:lgWhen(l)})).filter(x=>inMon(x.when)).sort((a,b)=>b.when.localeCompare(a.when));
+  } else if(mode==='due') rows=L.filter(l=>l.type==='THU'&&l.status==='CHUA_DONG'&&inMon(l.date)).sort((a,b)=>b.date.localeCompare(a.date)).map(l=>({l,when:l.date}));
+  else rows=flowItems(L).filter(x=>(mode==='flow'||x.kind===mode)&&inMon(x.when));
   const tin=who?0:rows.filter(x=>x.kind==='in').reduce((t,x)=>t+x.amount,0), tout=who?0:rows.filter(x=>x.kind==='out').reduce((t,x)=>t+x.amount,0);
-  const head=`<div class="sec-row"><h3>Sổ thu chi</h3><select class="inp lg-who" data-lgwho aria-label="Lọc theo thành viên"><option value="">Tất cả thành viên</option>${people.map(p=>`<option ${p===who?'selected':''}>${esc(p)}</option>`).join('')}</select></div>
+  const head=`<h3>Sổ thu chi</h3><div class="lg-filters"><select class="inp lg-who" data-lgmon aria-label="Lọc theo tháng"><option value="">Mọi tháng</option>${months.map(m=>`<option value="${m}" ${m===mon?'selected':''}>Tháng ${monthLabel(m)}</option>`).join('')}</select><select class="inp lg-who" data-lgwho aria-label="Lọc theo thành viên"><option value="">Tất cả thành viên</option>${people.map(p=>`<option ${p===who?'selected':''}>${esc(p)}</option>`).join('')}</select></div>
     ${who?'':`<div class="seg mini">${LG_MODES.map(([k,l])=>`<button data-act="lgMode" data-v="${k}" class="${k===mode?'on':''}">${l}</button>`).join('')}</div>`}`;
   if(who){
-    const mine=L.filter(l=>l.person===who&&l.type==='THU'&&!isDep(l)), owe=mine.reduce((t,l)=>t+l.amount,0), paid=mine.filter(l=>l.status!=='CHUA_DONG').reduce((t,l)=>t+l.amount,0), cr=creditsOf(L)[who]||0;
+    const mine=L.filter(l=>l.person===who&&l.type==='THU'&&!isDep(l)&&inMon(l.status==='DA_DONG'?lgWhen(l):l.date)), owe=mine.reduce((t,l)=>t+l.amount,0), paid=mine.filter(l=>l.status!=='CHUA_DONG').reduce((t,l)=>t+l.amount,0), cr=creditsOf(L)[who]||0;
     const adv=L.filter(l=>l.type==='CHI'&&l.person===who).reduce((t,l)=>t+l.amount,0);
-    return head+`<div class="stats"><div class="stat glass"><small>Phải đóng</small><b>${kmoney(owe)}</b></div><div class="stat glass"><small>Đã đóng</small><b class="pos">${kmoney(paid)}</b></div><div class="stat glass"><small>Còn nợ</small><b class="${owe-paid>0?'neg':'pos'}">${kmoney(owe-paid)}</b></div>${cr?`<div class="stat glass"><small>Tiền gửi còn</small><b class="pos">${kmoney(cr)}</b></div>`:''}${adv?`<div class="stat glass"><small>Đã ứng sân/nước</small><b>${kmoney(adv)}</b></div>`:''}</div>
+    return head+`${mon?`<div class="sub" style="padding:0 6px">Chỉ tính các khoản phát sinh / đóng trong tháng ${monthLabel(mon)}</div>`:''}<div class="stats"><div class="stat glass"><small>Phải đóng</small><b>${kmoney(owe)}</b></div><div class="stat glass"><small>Đã đóng</small><b class="pos">${kmoney(paid)}</b></div><div class="stat glass"><small>Còn nợ</small><b class="${owe-paid>0?'neg':'pos'}">${kmoney(owe-paid)}</b></div>${cr?`<div class="stat glass"><small>Tiền gửi còn</small><b class="pos">${kmoney(cr)}</b></div>`:''}${adv?`<div class="stat glass"><small>Đã ứng sân/nước</small><b>${kmoney(adv)}</b></div>`:''}</div>
       <div class="panel glass">${rows.slice(0,n).map(({l})=>{ const due=l.status==='CHUA_DONG', out=l.type==='CHI'||l.amount<0;
         const st=l.type==='CHI'?`${esc(who)} ứng · ${shortDate(l.date)}`:due?'<span class="neg">chưa trả</span>':viaDep(l)?`trừ tiền gửi · ${atLabel(l.at)}`:`<span class="pos">đã đóng ${atLabel(l.at)}</span>${l.by?' · '+esc(l.by)+' ghi':''}`;
         return `<button class="lrow" data-act="ledger" data-id="${l.id}"><span class="licon ${l.type==='CHI'?'out':due?'wait':'in'}"><span class="ms">${l.type==='CHI'?'north_east':due?'schedule':'south_west'}</span></span>
@@ -2978,14 +3010,14 @@ const ACT={
     const month=openMonthly.month;needPin().then(pin=>call('api_deleteLedger',t.dataset.id,pin,ensureMe())).then(b=>{S.boot=b;render();openMonthly(month);toast(t.dataset.name+' chuyển thành vãng lai tháng '+monthLabel(month));}).catch(fail);},
   copyDebt(t){const d=debtsOf(S.boot.ledger).find(x=>x.name===t.dataset.name);if(!d)return;const b=bankLine();copyText(`💰 ${d.name} · CÒN NỢ ${kmoney(d.sum)}\n${d.groups.map(g=>`• ${g.label}: ${g.items.map(i=>(i.sessionId==='DK'&&i.note?i.note:itemLabel(i.category))+' '+kmoney(i.amount)).join(' + ')}`).join('\n')}${b?'\n\n'+b:''}`);},
   shareDebts:()=>{ if(debtsOf(S.boot.ledger).length) openShare('debts'); else toast('Không ai nợ quỹ'); },
-  openMonthly:()=>openMonthly(),
-  moMode(t){openMonthly.O.mode=t.dataset.v;openMonthly.O.refresh();},
-  moTap(t){const O=openMonthly.O,n=t.dataset.name;
-    if(O.mode==='reg'){ if(O.reg.has(n)){O.reg.delete(n);O.paid.delete(n);} else O.reg.add(n); }
-    else { if(O.paid.has(n)) O.paid.delete(n); else {O.paid.add(n);O.reg.add(n);} }
+  openMonthly:t=>openMonthly(t&&t.dataset&&t.dataset.m),
+  moTap(t){const O=openMonthly.O,n=t.dataset.name; // chưa ĐK → ĐK chưa đóng → đã đóng → bỏ
+    if(!O.reg.has(n)) O.reg.add(n); else if(!O.paid.has(n)) O.paid.add(n); else { O.reg.delete(n); O.paid.delete(n); }
     O.refresh();},
+  moAllPaid(){const O=openMonthly.O;[...O.reg].forEach(n=>O.paid.add(n));O.refresh();},
+  moNav(t){openMonthly(shiftMonth(openMonthly.O.month,+t.dataset.d));},
   moAll(t){const O=openMonthly.O,on=t.dataset.v==='1',vis=[...document.querySelectorAll('#moList [data-name]')].filter(e=>!e.hidden).map(e=>e.dataset.name);
-    vis.forEach(n=>{ if(O.mode==='reg'){ if(on)O.reg.add(n); else {O.reg.delete(n);O.paid.delete(n);} } else { if(on){if(O.reg.has(n))O.paid.add(n);} else O.paid.delete(n); } });
+    vis.forEach(n=>{ if(on)O.reg.add(n); else {O.reg.delete(n);O.paid.delete(n);} });
     O.refresh();},
   moFlag(){const O=openMonthly.O,prev=monthRegs(shiftMonth(O.month,-1));if(!prev){toast('Tháng trước chưa có ai đăng ký tháng');return;}O.reg.clear();prev.forEach(n=>O.reg.add(n));[...O.paid].forEach(n=>{if(!O.reg.has(n))O.paid.delete(n);});O.refresh();},
   memMonthly(t){memSet(t.dataset.id,'monthly',t);},
@@ -3014,7 +3046,10 @@ const ACT={
   lType(t){document.querySelectorAll('#lType button').forEach(b=>b.classList.toggle('on',b===t));},
   openSession(t){loadSession(t.dataset.id).then(()=>{S.tab='matches';render();window.scrollTo({top:0});});},
   pickSession(){const ss=S.boot?.sessions||[];openSheet(`<div class="sh-head"><h2>Chọn buổi</h2><button class="icon-btn" data-act="closeSheet" aria-label="Đóng"><span class="ms">close</span></button></div>
-    <div>${ss.map(s=>{const x=pd(s.date);return `<button class="srow" data-act="openSession" data-id="${s.id}" style="${s.id===S.sid?'background:var(--primary-c)':''}"><span class="datebox"><small>${DOW[x.getDay()]}</small><b>${x.getDate()}</b><small>Th${x.getMonth()+1}</small></span><div class="pname">${s.players.length} người · ${s.doneCount}/${s.matchCount} trận<small>${s.start} · ${s.status==='CHOT'?'Đã chốt':'Đang mở'}</small></div><span class="ms">chevron_right</span></button>`;}).join('')||'<div class="sub">Chưa có buổi nào</div>'}</div>
+    <div class="legend" style="margin-bottom:6px"><span class="status MO">Sắp đánh</span><span class="status LIVE">Đang đánh</span><span class="status PAST">Chưa chốt</span><span class="status CHOT">Đã chốt</span></div>
+    <div>${(()=>{ let lastM=''; return ss.map(s=>{ const m=s.date.slice(0,7), st=sessState(s);
+      const hd=m!==lastM?`<div class="mon-head" style="border-left:6px solid ${monColor(s.date)}">Tháng ${monthLabel(m)} · ${ss.filter(z=>z.date.slice(0,7)===m).length} buổi</div>`:''; lastM=m;
+      return hd+`<button class="srow ${s.id===S.sid?'cur':''}" data-act="openSession" data-id="${s.id}">${dateBox(s)}<div class="pname">${s.players.length} người · ${s.doneCount}/${s.matchCount} trận<small>${s.start}${s.courts>1?` · ${s.courts} sân`:''}${s.id===S.sid?' · <b>đang xem</b>':''}</small></div><span class="status ${st.k}">${st.t}</span></button>`; }).join(''); })()||'<div class="sub">Chưa có buổi nào</div>'}</div>
     <button class="btn filled" data-act="newSession"><span class="ms">add</span>Tạo buổi mới</button>`);},
   settings:()=>openSettings(),
   theme(t){store.set('sopick_theme',t.dataset.v||null);applyTheme();document.querySelectorAll('#sTheme button').forEach(b=>b.classList.toggle('on',b===t));},
@@ -3030,7 +3065,8 @@ document.addEventListener('click',e=>{
   if(t.tagName==='BUTTON'||t.tagName==='A') e.preventDefault();
   a(t,e);
 });
-document.addEventListener('change',e=>{ if(e.target.dataset&&e.target.dataset.lgwho!==undefined){ S.lgWho=e.target.value; S.lgN=40; render(); } });
+document.addEventListener('change',e=>{ if(e.target.dataset&&e.target.dataset.lgwho!==undefined){ S.lgWho=e.target.value; S.lgN=40; render(); }
+  if(e.target.dataset&&e.target.dataset.lgmon!==undefined){ S.lgMon=e.target.value; S.lgN=40; render(); } });
 document.addEventListener('input',e=>{ if(e.target.id==='q'){ S.q=e.target.value; renderList(); }
   if(e.target.dataset&&e.target.dataset.cn!==undefined&&openCreate.F){ openCreate.F.courtNames[+e.target.dataset.cn]=e.target.value.trim()||('Sân '+(+e.target.dataset.cn+1)); }
   if(e.target.dataset&&e.target.dataset.filter){ const q=fold(e.target.value); document.querySelectorAll(e.target.dataset.filter+' [data-name]').forEach(el=>el.hidden=!!q&&!fold(el.dataset.name).includes(q)); }
