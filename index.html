@@ -444,6 +444,10 @@ button.prow{width:100%;text-align:left;font:inherit;color:inherit}
 .sg b{font-size:14.5px}.sg em{font-style:normal;color:var(--muted);font-weight:600;margin:0 2px}.sg small{font-size:11.5px;color:var(--muted);line-height:1.35}
 .sg:active{background:var(--win-c)}
 .mon-head{margin:12px 0 4px;padding:2px 10px;font-weight:800;font-size:13px;color:var(--muted)}
+.stat.go{position:relative;text-align:left;cursor:pointer;transition:transform .12s}.stat.go:active{transform:scale(.97)}
+.stat.go .ms{position:absolute;right:8px;top:50%;transform:translateY(-50%);font-size:20px;color:var(--muted);opacity:.7}
+.pmback{margin:-4px 0 2px -6px}.pmchips{flex-wrap:nowrap;overflow-x:auto;margin:4px 0}
+.lrow.pm.mark{box-shadow:inset 3px 0 0 var(--ball)}.lrow.pmg{grid-template-columns:1fr auto}
 .srow.cur{background:color-mix(in srgb,var(--primary) 12%,transparent);outline:2px solid var(--primary);outline-offset:-2px}
 .lg-filters{display:flex;gap:8px;margin:-4px 0 4px}.lg-filters .lg-who{flex:1;max-width:none}
 .mf-teams{display:grid;grid-template-columns:1fr auto 1fr;gap:8px;align-items:end}.mf-teams .field{gap:6px}.mf-teams .inp{height:42px}.mf-vs{font-weight:800;color:var(--muted);padding-bottom:12px}
@@ -610,8 +614,8 @@ setTimeout(function(){if(!window.__SOPICK_END__){var v=document.getElementById('
 /* ====== CẤU HÌNH BẢN MOBILE ======
  * Dán link web app Apps Script (…/exec) vào giữa 2 dấu nháy dưới đây.
  * (Hoặc mở 1 lần: https://<tên>.github.io/<repo>/?api=<link …/exec> – app tự nhớ link trên máy đó.) */
-window.SOPICK_API = 'https://script.google.com/macros/s/AKfycbwsb0gp1YGfcOxjVDb7brPqZbkkTmrOAdfTySYc6pfiJShR2WbKRstfZTVksdnSaT0U/exec';
-window.SOPICK_BUILD = '27/10/2026 09:47';
+window.SOPICK_API = 'https://script.google.com/macros/s/AKfycbwADPV7P0z5tdS3jotiILErF3HKfY1NQrREnBI9sKxDpyDWP0kqo1D0kILbKMumAFvt/exec';
+window.SOPICK_BUILD = '27/10/2026 11:00';
 (function(){ var FILE=window.SOPICK_API; window.SOPICK_FILE_API=FILE;
   try{ var q=new URLSearchParams(location.search).get('api');
     if(q&&/^https:\/\/script\.google\.com\/.+\/exec$/.test(q)){ localStorage.setItem('sopick_api',q); localStorage.setItem('sopick_api_base',FILE); history.replaceState(null,'',location.pathname); }
@@ -1619,7 +1623,7 @@ function openH2HPair(a,b,rel){
       <div class="pname"><span class="${won?'pos':''}">${esc(A)}</span> <em class="sub">vs</em> <span class="${won?'':'pos'}">${esc(B)}</span>
         <small>${DOW[pd(m.date).getDay()]} ${shortDate(m.date)} · ${TYPE_NAME[m.kind||'DN']}${m.mode==='GL'?' · giao lưu':''}${x?' · '+STYPE[sessType(x)]:''}${m.no?' · trận #'+m.no:''}${m.addedBy?` · ✍ ${esc(m.addedBy)} thêm tay`:''}</small></div>
       <span class="lamt ${won?'pos':'neg'}">${sc}</span></div>`; }).join('');
-  openSheet(`<div class="sh-head"><div><h2>${esc(a)} ${rel==='opp'?'vs':'&'} ${esc(b)}</h2><div class="sub">${rel==='opp'?'Đối đầu':'Đánh cùng cặp'} · ${list.length} trận · <span class="pos">${w} thắng</span> – <span class="neg">${list.length-w} thua</span> (của ${esc(a)})</div></div><button class="icon-btn" data-act="closeSheet" aria-label="Đóng"><span class="ms">close</span></button></div>
+  openSheet(`${pmBackBtn(a)}<div class="sh-head"><div><h2>${esc(a)} ${rel==='opp'?'vs':'&'} ${esc(b)}</h2><div class="sub">${rel==='opp'?'Đối đầu':'Đánh cùng cặp'} · ${list.length} trận · <span class="pos">${w} thắng</span> – <span class="neg">${list.length-w} thua</span> (của ${esc(a)})</div></div><button class="icon-btn" data-act="closeSheet" aria-label="Đóng"><span class="ms">close</span></button></div>
     <div class="panel glass">${rows||'<div class="sub" style="padding:12px">Chưa có trận nào có tỷ số</div>'}</div>`);
 }
 /* ---- Lịch sử: đối đầu theo tháng / quý / năm ---- */
@@ -2053,6 +2057,8 @@ function openMatchForm(id,preset){
 }
 const MatchActs={
   h2hPair(t){ const go=()=>openH2HPair(t.dataset.a,t.dataset.b,t.dataset.rel); if(S.allMatches) go(); else ensureAll().then(go).catch(fail); },
+  pmSub(t){ openPlayerMs(t.dataset.name,t.dataset.mode,t.dataset.sub); },
+  pmView(t){ const go=()=>openPlayerMs(t.dataset.name,t.dataset.mode); if(S.allMatches) go(); else ensureAll().then(go).catch(fail); },
   qsWin(t){ openScore.W=t.dataset.w; document.querySelectorAll('.qs-t').forEach(b=>b.classList.toggle('on',b===t)); const l=$('#qsLose'); l.hidden=false; setTimeout(()=>l.scrollIntoView({behavior:'smooth',block:'nearest'}),30); },
   qsLose(t){ const T=TG(), lo=+t.dataset.l, hi=lo>=T-1?lo+2:T; openScore.W==='A'?openScore.save(hi,lo):openScore.save(lo,hi); },
   openDeposit(t){openDeposit(t.dataset.name||'');},
@@ -2824,6 +2830,93 @@ function openPayGroup(ids){
 }
 
 /* ---------- hồ sơ người chơi (BXH) ---------- */
+/* ---------- Chi tiết chỉ số của 1 người: các trận liên quan ---------- */
+/** Biệt hiệu → màn chi tiết phù hợp. */
+const NICK_MODE={vua:'rate',sat:'rate',rua:'rate',bb:'streak',ld:'streak',toang:'streak',tim:'streak',db:'diff',nc:'diff',mc:'big',lop:'diff',
+  tkt:'close',lk:'close',banh:'egg',qua:'eggL',bc:'wl',cb:'wl',ttk:'wl',tai:'wl',cc:'sess',cm:'sess',kt:'opp'};
+const pmBackBtn=a=>S.pmBack===a&&S.allMatches?`<button class="btn text sm pmback" data-act="player" data-name="${esc(a)}"><span class="ms">arrow_back</span>${esc(a)}</button>`:'';
+/** Buổi trong phạm vi BXH đang xem (khoảng thời gian + loại buổi). */
+function pmScope(){ const p=S.rankP||'all',t=S.rankT||'all',ss={}; S.boot.sessions.filter(s=>!isTrial(s)&&inPeriod(s.date,p)&&(t==='all'||sessType(s)===t)).forEach(s=>ss[s.id]=s); return ss; }
+/** Các trận có tỷ số của 1 người (mặc định bỏ trận giao lưu, giống BXH), xếp theo thời gian. */
+function playerMs(name,inclGL){
+  const ss=pmScope(); let ms=(S.allMatches||[]).map(amObj);
+  if(S.session&&ss[S.session.id]) ms=ms.filter(m=>m.sid!==S.session.id).concat(S.matches.filter(m=>m.win).map(m=>({...m,sid:S.session.id})));
+  return ms.filter(m=>ss[m.sid]&&m.win&&(inclGL||m.mode!=='GL')&&(m.a.includes(name)||m.b.includes(name))).map(m=>{
+    const my=m.a.includes(name)?'a':'b', won=(m.win==='A')===(my==='a'), f=+(my==='a'?m.sa:m.sb)||0, ag=+(my==='a'?m.sb:m.sa)||0;
+    return {...m,s:ss[m.sid],date:ss[m.sid].date,my,won,f,ag,mg:f-ag}; })
+    .sort((p,q)=>(p.date+String(p.no).padStart(3,'0')).localeCompare(q.date+String(q.no).padStart(3,'0')));
+}
+function pmRow(m,mark){ const A=tn(m.my==='a'?m.a:m.b), B=tn(m.my==='a'?m.b:m.a);
+  return `<div class="lrow pm ${m.won?'W':'L'}${mark&&/^[🔥📉]/u.test(mark)?' mark':''}"><span class="pm-res ${m.won?'W':'L'}">${m.won?'T':'B'}</span>
+    <div class="pname"><span class="${m.won?'pos':''}">${esc(A)}</span> <em class="sub">vs</em> <span class="${m.won?'':'pos'}">${esc(B)}</span>
+      <small>${DOW[pd(m.date).getDay()]} ${shortDate(m.date)} · ${TYPE_NAME[m.kind||'DN']}${m.mode==='GL'?' · giao lưu':''} · ${STYPE[sessType(m.s)]}${m.no?' · #'+m.no:''}${m.addedBy?' · ✍ '+esc(m.addedBy):''}${mark&&typeof mark==='string'?' · '+mark:''}</small></div>
+    <span class="lamt ${m.won?'pos':'neg'}">${m.f}–${m.ag}</span></div>`; }
+function pmList(ms,byMonth,markFn){ let last=''; return ms.map(m=>{ const mon=m.date.slice(0,7), hd=byMonth&&mon!==last?`<div class="mon-head" style="border-left:6px solid ${monColor(m.date)}">Tháng ${monthLabel(mon)}</div>`:''; last=mon; return hd+pmRow(m,markFn&&markFn(m)); }).join('')||'<div class="sub" style="padding:12px">Không có trận nào</div>'; }
+const wlTxt=(w,l)=>`<span class="pos">${w}T</span>–<span class="neg">${l}B</span>${w+l?` · ${Math.round(w*100/(w+l))}%`:''}`;
+function pmGroupTable(title,groups){ // groups: [[label, ms]]
+  const rows=groups.filter(g=>g[1].length).map(([lb,ms])=>{const w=ms.filter(m=>m.won).length,l=ms.length-w;return `<div class="lrow pmg"><div class="pname">${lb}<small>${ms.length} trận</small></div><span class="lamt">${wlTxt(w,l)} <span class="wbar"><i style="width:${Math.round(w*100/ms.length)}%"></i></span></span></div>`;}).join('');
+  return rows?`<h3>${title}</h3><div class="panel glass">${rows}</div>`:''; }
+const PM_MODES=[['sess','Buổi · trận'],['wl','Thắng–thua'],['rate','Tỷ lệ'],['streak','Chuỗi'],['diff','Hiệu số'],['close','Sát nút'],['big','Thắng đậm'],['egg','Bánh trứng'],['opp','Đối đầu'],['mate','Đánh cặp']];
+function openPlayerMs(name,mode,sub){
+  S.pmBack=name; const all=playerMs(name), W=all.filter(m=>m.won), L=all.filter(m=>!m.won), p=S.rankP||'all', t=S.rankT||'all';
+  const scope=`${t==='all'?'Mọi buổi':STYPE[t]} · ${PERIODS.find(x=>x[0]===p)[1].toLowerCase()} · không tính trận giao lưu`;
+  const rev=ms=>[...ms].reverse();
+  let title='', body='';
+  if(mode==='sess'){ title='Buổi · Trận';
+    const ss=pmScope(), mine=Object.values(ss).filter(s=>s.doneCount&&s.players.includes(name)).sort((a,b)=>b.date.localeCompare(a.date));
+    body=`<div class="calc"><span>Có mặt <b>${mine.length}</b> buổi · đánh <b>${all.length}</b> trận · trung bình <b>${mine.length?(all.length/mine.length).toFixed(1).replace('.',','):0}</b> trận/buổi · ${wlTxt(W.length,L.length)}</span></div>`+
+      mine.map(s=>{const ms=rev(all.filter(m=>m.sid===s.id)), w=ms.filter(m=>m.won).length;
+        return `<div class="mon-head" style="border-left:6px solid ${monColor(s.date)}">${DOW[pd(s.date).getDay()]} ${shortDate(s.date)} · ${STYPE[sessType(s)]} · ${ms.length} trận · ${wlTxt(w,ms.length-w)}</div><div class="panel glass">${ms.map(m=>pmRow(m)).join('')||'<div class="sub" style="padding:10px 12px">Có mặt nhưng không có trận tính BXH</div>'}</div>`;}).join('');
+  } else if(mode==='wl'){ title='Thắng – Thua'; sub=sub||'all';
+    const ms=sub==='W'?W:sub==='L'?L:all;
+    body=`<div class="seg mini">${[['all',`Tất cả ${all.length}`],['W',`Thắng ${W.length}`],['L',`Thua ${L.length}`]].map(([k,l])=>`<button data-act="pmSub" data-name="${esc(name)}" data-mode="wl" data-sub="${k}" class="${sub===k?'on':''}">${l}</button>`).join('')}</div>
+      <div class="calc"><span>${wlTxt(W.length,L.length)} · ghi ${all.reduce((a,m)=>a+m.f,0)} điểm, để thủng ${all.reduce((a,m)=>a+m.ag,0)} điểm</span></div>
+      <div class="panel glass">${pmList(rev(ms),true)}</div>`;
+  } else if(mode==='rate'){ title='Tỷ lệ thắng';
+    const by=(f)=>{const g={};all.forEach(m=>{const k=f(m);(g[k]=g[k]||[]).push(m);});return g;};
+    const mon=by(m=>m.date.slice(0,7)), kind=by(m=>m.kind||'DN'), typ=by(m=>sessType(m.s)), ses=by(m=>m.sid);
+    const last10=all.slice(-10), lw=last10.filter(m=>m.won).length;
+    body=`<div class="calc"><span>Tổng: ${wlTxt(W.length,L.length)}</span><span>10 trận gần nhất: ${wlTxt(lw,last10.length-lw)}</span></div>`+
+      pmGroupTable('Theo tháng',Object.keys(mon).sort().reverse().map(k=>['Tháng '+monthLabel(k),mon[k]]))+
+      pmGroupTable('Theo loại buổi',Object.keys(typ).map(k=>[STYPE_IC[k]+' '+STYPE[k],typ[k]]))+
+      pmGroupTable('Theo thể loại',Object.keys(kind).map(k=>[TYPE_NAME[k]||k,kind[k]]))+
+      pmGroupTable('Theo từng buổi',Object.keys(ses).sort((a,b)=>ses[b][0].date.localeCompare(ses[a][0].date)).map(k=>[`${DOW[pd(ses[k][0].date).getDay()]} ${shortDate(ses[k][0].date)}`,ses[k]]))+
+      `<h3>Các trận</h3><div class="panel glass">${pmList(rev(all),true)}</div>`;
+  } else if(mode==='streak'){ title='Chuỗi thắng / thua';
+    const runs=[]; all.forEach((m,i)=>{const r=runs[runs.length-1]; if(r&&r.won===m.won) r.ms.push(m); else runs.push({won:m.won,ms:[m]});});
+    const bestW=runs.filter(r=>r.won).sort((a,b)=>b.ms.length-a.ms.length)[0], bestL=runs.filter(r=>!r.won).sort((a,b)=>b.ms.length-a.ms.length)[0], cur=runs[runs.length-1];
+    const rng=r=>`${shortDate(r.ms[0].date)}${r.ms[0].date!==r.ms[r.ms.length-1].date?' → '+shortDate(r.ms[r.ms.length-1].date):''}`;
+    const inW=new Set(bestW?bestW.ms:[]), inL=new Set(bestL?bestL.ms:[]);
+    body=`<div class="calc"><span>🔥 Chuỗi thắng dài nhất: <b class="pos">${bestW?bestW.ms.length:0} trận</b>${bestW?' ('+rng(bestW)+')':''}</span>
+      <span>📉 Chuỗi thua dài nhất: <b class="neg">${bestL?bestL.ms.length:0} trận</b>${bestL?' ('+rng(bestL)+')':''}</span>
+      <span>Hiện tại: ${cur?`<b class="${cur.won?'pos':'neg'}">${cur.ms.length} trận ${cur.won?'thắng':'thua'} liên tiếp</b>`:'–'}</span></div>
+      <div class="sub" style="padding:0 6px">Dòng có viền là trận nằm trong chuỗi dài nhất.</div>
+      <div class="panel glass">${pmList(rev(all),true,m=>inW.has(m)?'🔥 chuỗi thắng':inL.has(m)?'📉 chuỗi thua':'')}</div>`;
+  } else if(mode==='diff'){ title='Hiệu số điểm';
+    const pf=all.reduce((a,m)=>a+m.f,0), pa=all.reduce((a,m)=>a+m.ag,0), n=all.length||1;
+    body=`<div class="calc"><span>Ghi <b class="pos">${pf}</b> · thủng <b class="neg">${pa}</b> · hiệu số <b>${pf-pa>0?'+':''}${pf-pa}</b></span><span>Trung bình mỗi trận: ghi ${(pf/n).toFixed(1).replace('.',',')} · thủng ${(pa/n).toFixed(1).replace('.',',')}</span></div>
+      <div class="sub" style="padding:0 6px">Xếp từ trận thắng đậm nhất đến trận thua đậm nhất.</div>
+      <div class="panel glass">${pmList([...all].sort((a,b)=>b.mg-a.mg||b.date.localeCompare(a.date)),false,m=>(m.mg>0?'+':'')+m.mg)}</div>`;
+  } else if(mode==='close'){ title='Trận sát nút (cách 2 điểm)';
+    const c=all.filter(m=>Math.abs(m.mg)<=2), w=c.filter(m=>m.won).length;
+    body=`<div class="calc"><span>${c.length} trận sát nút · ${wlTxt(w,c.length-w)}</span></div><div class="panel glass">${pmList(rev(c),true)}</div>`;
+  } else if(mode==='big'){ title='Thắng đậm / thua đậm (cách ≥ 6)';
+    const bw=all.filter(m=>m.mg>=6).sort((a,b)=>b.mg-a.mg), bl=all.filter(m=>m.mg<=-6).sort((a,b)=>a.mg-b.mg);
+    body=`<h3>Thắng đậm · ${bw.length}</h3><div class="panel glass">${pmList(bw,false,m=>'+'+m.mg)}</div><h3>Thua đậm · ${bl.length}</h3><div class="panel glass">${pmList(bl,false,m=>String(m.mg))}</div>`;
+  } else if(mode==='egg'||mode==='eggL'){ title='Bánh trứng (≤ 3 điểm)';
+    const e1=all.filter(m=>m.won&&m.ag<=3), e2=all.filter(m=>!m.won&&m.f<=3);
+    body=`<h3>🥚 Cho đối thủ ăn bánh trứng · ${e1.length}</h3><div class="panel glass">${pmList(rev(e1),false)}</div><h3>🎁 Bị ăn bánh trứng · ${e2.length}</h3><div class="panel glass">${pmList(rev(e2),false)}</div>`;
+  } else if(mode==='opp'||mode==='mate'){ title=mode==='opp'?'Đối đầu':'Đánh cặp với';
+    const g={}; playerMs(name,true).forEach(m=>{ const mine=m.my==='a'?m.a:m.b, oth=m.my==='a'?m.b:m.a;
+      (mode==='opp'?oth.filter(Boolean):mine.filter(x=>x&&x!==name)).forEach(o=>{const r=g[o]||(g[o]={n:o,ms:[]});r.ms.push(m);}); });
+    body=`<div class="sub" style="padding:0 6px">Gồm cả trận giao lưu. Bấm từng người để xem từng trận.</div><div class="panel glass">${Object.values(g).sort((a,b)=>b.ms.length-a.ms.length).map(x=>{const w=x.ms.filter(m=>m.won).length;
+      return `<button class="lrow" data-act="h2hPair" data-a="${esc(name)}" data-b="${esc(x.n)}" data-rel="${mode}">${avatar(x.n)}<div class="pname">${mode==='opp'?'vs ':''}${esc(x.n)}<small>${x.ms.length} trận · gần nhất ${shortDate(x.ms[x.ms.length-1].date)}</small></div><span class="lamt">${wlTxt(w,x.ms.length-w)}</span></button>`;}).join('')||'<div class="sub" style="padding:12px">Chưa có dữ liệu</div>'}</div>`;
+  }
+  openSheet(`<button class="btn text sm pmback" data-act="player" data-name="${esc(name)}"><span class="ms">arrow_back</span>${esc(name)}</button>
+    <div class="sh-head"><div style="display:flex;gap:10px;align-items:center">${avatar(name,40)}<div><h2>${title}</h2><div class="sub">${esc(name)} · ${scope}</div></div></div><button class="icon-btn" data-act="closeSheet" aria-label="Đóng"><span class="ms">close</span></button></div>
+    <div class="chips pmchips">${PM_MODES.map(([k,l])=>`<button class="chip ${k===mode||(mode==='eggL'&&k==='egg')?'on':''}" data-act="pmView" data-name="${esc(name)}" data-mode="${k}">${l}</button>`).join('')}</div>
+    ${body}`);
+}
 function openPlayer(name){
   const p=S.rankP||'all', R=rankData(p,S.rankT||'all'), me=R.list.find(x=>x.name===name); if(!me) return;
   const sess={}; S.boot.sessions.filter(s=>!isTrial(s)&&inPeriod(s.date,p)&&((S.rankT||'all')==='all'||sessType(s)===S.rankT)).forEach(s=>sess[s.id]=1);
@@ -2835,11 +2928,14 @@ function openPlayer(name){
     other.filter(Boolean).forEach(o=>{const r=opp[o]||(opp[o]={n:o,p:0,w:0}); r.p++; if(won) r.w++;});
   });
   const bar=(w,p)=>`<span class="wbar"><i style="width:${p?Math.round(w*100/p):0}%"></i></span>`;
-  const rank=R.list.indexOf(me)+1;
-  openSheet(`<div class="sh-head"><div style="display:flex;gap:12px;align-items:center">${avatar(name,48)}<div><h2>${esc(name)}</h2><div class="sub">Hạng ${rank}/${R.list.length} · ${me.pts} điểm · ${PERIODS.find(x=>x[0]===p)[1]}</div>${me.nk?`<div style="margin-top:4px">${nickTag(me,1)}</div><div class="sub" style="font-size:12px">${esc(me.nk.why)} · ${esc(me.nk.d)}</div>`:''}</div></div><button class="icon-btn" data-act="closeSheet" aria-label="Đóng"><span class="ms">close</span></button></div>
-    <div class="stats"><div class="stat glass"><small>Buổi · Trận</small><b>${me.att} · ${me.p}</b></div><div class="stat glass"><small>Thắng–Thua</small><b><span class="pos">${me.w}</span>–<span class="neg">${me.l}</span></b></div>
-      <div class="stat glass"><small>Tỷ lệ thắng</small><b>${Math.round(me.rate*100)}%</b></div><div class="stat glass"><small>Chuỗi thắng dài nhất</small><b>${me.best}</b></div></div>
-    <h3>Đánh cặp với</h3><div class="panel glass">${Object.values(part).sort((a,b)=>b.w/b.p-a.w/a.p||b.p-a.p).map(x=>`<div class="lrow">${avatar(x.n)}<div class="pname">${esc(x.n)}<small>${x.p} trận cùng đội · thắng ${x.w}</small></div><span class="lamt">${Math.round(x.w*100/x.p)}% ${bar(x.w,x.p)}</span></div>`).join('')||'<div class="sub" style="padding:12px">Chưa có dữ liệu</div>'}</div>
+  const rank=R.list.indexOf(me)+1; S.pmBack=name;
+  openSheet(`<div class="sh-head"><div style="display:flex;gap:12px;align-items:center">${avatar(name,48)}<div><h2>${esc(name)}</h2><div class="sub">Hạng ${rank}/${R.list.length} · ${me.pts} điểm · ${PERIODS.find(x=>x[0]===p)[1]}</div>${me.nk?`<div style="margin-top:4px" ${NICK_MODE[me.nk.k]?`data-act="pmView" data-name="${esc(name)}" data-mode="${NICK_MODE[me.nk.k]}" role="button" style="cursor:pointer"`:''}>${nickTag(me,1)}</div><div class="sub" style="font-size:12px">${esc(me.nk.why)} · ${esc(me.nk.d)}</div>`:''}</div></div><button class="icon-btn" data-act="closeSheet" aria-label="Đóng"><span class="ms">close</span></button></div>
+    ${(()=>{ const cl=playerMs(name).filter(m=>Math.abs(m.mg)<=2); const st=(k,lb,v)=>`<button class="stat glass go" data-act="pmView" data-name="${esc(name)}" data-mode="${k}"><small>${lb}</small><b>${v}</b><span class="ms">chevron_right</span></button>`;
+      return `<div class="stats">${st('sess','Buổi · Trận',`${me.att} · ${me.p}`)}${st('wl','Thắng–Thua',`<span class="pos">${me.w}</span>–<span class="neg">${me.l}</span>`)}
+      ${st('rate','Tỷ lệ thắng',Math.round(me.rate*100)+'%')}${st('streak','Chuỗi thắng dài nhất',me.best)}
+      ${st('diff','Hiệu số điểm',(me.diff>0?'+':'')+me.diff)}${st('close','Trận sát nút (±2)',`<span class="pos">${cl.filter(m=>m.won).length}</span>–<span class="neg">${cl.filter(m=>!m.won).length}</span>`)}</div>
+      <div class="sub" style="padding:0 6px">Bấm vào từng ô / từng người để xem các trận liên quan.</div>`; })()}
+    <h3>Đánh cặp với</h3><div class="panel glass">${Object.values(part).sort((a,b)=>b.w/b.p-a.w/a.p||b.p-a.p).map(x=>`<button class="lrow" data-act="h2hPair" data-a="${esc(name)}" data-b="${esc(x.n)}" data-rel="mate">${avatar(x.n)}<div class="pname">${esc(x.n)}<small>${x.p} trận cùng đội · thắng ${x.w} · bấm xem từng trận</small></div><span class="lamt">${Math.round(x.w*100/x.p)}% ${bar(x.w,x.p)}</span></button>`).join('')||'<div class="sub" style="padding:12px">Chưa có dữ liệu</div>'}</div>
     <h3>Đối đầu</h3><div class="panel glass">${Object.values(opp).sort((a,b)=>b.p-a.p).map(x=>`<button class="lrow" data-act="h2hPair" data-a="${esc(name)}" data-b="${esc(x.n)}" data-rel="opp">${avatar(x.n)}<div class="pname">vs ${esc(x.n)}<small>${x.p} lần gặp · bấm xem từng trận</small></div><span class="lamt"><span class="pos">${x.w}</span>–<span class="neg">${x.p-x.w}</span></span></button>`).join('')||'<div class="sub" style="padding:12px">Chưa có dữ liệu</div>'}</div>`);
 }
 
