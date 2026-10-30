@@ -366,6 +366,10 @@ button.prow{width:100%;text-align:left;font:inherit;color:inherit}
 .mrow:not(.tint){grid-template-columns:24px minmax(0,1fr) auto minmax(0,1fr)}
 .mrow.tint{background:color-mix(in srgb,var(--cc) 13%,transparent);box-shadow:inset 3px 0 0 var(--cc)}
 .mrow.next{outline:2px solid var(--ball);outline-offset:-2px}
+.mrow.rsv,.match.rsv{background:repeating-linear-gradient(135deg,color-mix(in srgb,#F5A524 16%,transparent) 0 10px,color-mix(in srgb,#F5A524 6%,transparent) 10px 20px)!important;box-shadow:inset 0 0 0 1.5px color-mix(in srgb,#F5A524 55%,transparent)!important}
+.mk.rsvk{background:#C77700;color:#fff;top:auto;bottom:-9px}
+.rsv-head{margin:8px 4px 2px;padding:8px 10px;border-radius:12px;font-size:12.5px;font-weight:600;color:#7A4A00;background:color-mix(in srgb,#F5A524 18%,transparent)}
+.prev .prsv{background:color-mix(in srgb,#F5A524 16%,transparent);border-radius:10px}
 .mrow.z1{background:color-mix(in srgb,var(--primary) 7%,transparent)}.mrow.z0{background:color-mix(in srgb,var(--glass-hi,#fff) 55%,transparent)}
 .nm{display:inline;padding:1px 5px;border-radius:7px;background:color-mix(in srgb,var(--nc) 28%,transparent);-webkit-box-decoration-break:clone;box-decoration-break:clone}
 .team .nm{display:inline-block;padding:2px 8px}
@@ -614,8 +618,8 @@ setTimeout(function(){if(!window.__SOPICK_END__){var v=document.getElementById('
 /* ====== CẤU HÌNH BẢN MOBILE ======
  * Dán link web app Apps Script (…/exec) vào giữa 2 dấu nháy dưới đây.
  * (Hoặc mở 1 lần: https://<tên>.github.io/<repo>/?api=<link …/exec> – app tự nhớ link trên máy đó.) */
-window.SOPICK_API = 'https://script.google.com/macros/s/AKfycbypakynqSGvYoye7osS-HDqkGqZ75Wq1xBlnt0Pmky3FZewfnWZZXvl0NZTvz0G464/exec';
-window.SOPICK_BUILD = '30/10/2026 15:14';
+window.SOPICK_API = 'https://script.google.com/macros/s/AKfycbwADPV7P0z5tdS3jotiILErF3HKfY1NQrREnBI9sKxDpyDWP0kqo1D0kILbKMumAFvt/exec';
+window.SOPICK_BUILD = '30/10/2026 15:43';
 (function(){ var FILE=window.SOPICK_API; window.SOPICK_FILE_API=FILE;
   try{ var q=new URLSearchParams(location.search).get('api');
     if(q&&/^https:\/\/script\.google\.com\/.+\/exec$/.test(q)){ localStorage.setItem('sopick_api',q); localStorage.setItem('sopick_api_base',FILE); history.replaceState(null,'',location.pathname); }
@@ -663,7 +667,7 @@ function addLuck(st,A,B){
 }
 // Trọng số: lặp cặp TRONG BUỔI phạt rất nặng; lặp với các buổi trước phạt nhẹ (chỉ để xoay tour); cân trình & bù may theo trình
 // Thứ tự ưu tiên: (1) trình 2 đội cân · (2) số trận đều (gần như bắt buộc, ở scoreSchedule) · (3) không lặp cặp trong buổi, ưu tiên cặp mới · (4) bù "may đồng đội" qua các buổi
-const W_PART=60, W_PART_P=8, W_OPP=2, W_OPP_P=0.5, W_BAL=30, W_LUCK=4;
+const W_PART=60, W_PART_P=8, W_OPP=2, W_OPP_P=0.5, W_BAL=30, W_LUCK=10;
 /** Trận các buổi trước (trong chu kỳ): chỉ cộng số lần đã CẶP / đã GẶP (ma trận riêng), không cộng số trận (số trận bù riêng bằng carry). */
 function applyPrior(st,m){
   const A=m.a.map(p=>st.idx[p]), B=m.b.map(p=>st.idx[p]);
@@ -767,7 +771,7 @@ function scoreSchedule(players,all,opt){
   if(opt&&opt.carry){ const T=players.map((p,i)=>g[i]+(opt.carry[p]||0)), mu=T.reduce((a,b)=>a+b,0)/T.length; s+=T.reduce((a,t)=>a+(t-mu)**2,0)*300; }
   for(let i=0;i<st.n;i++) for(let j=i+1;j<st.n;j++){ s+=W_PART*Math.max(0,st.part[i][j]-1)*5 + W_PART*st.part[i][j]**2 + W_PART_P*st.part[i][j]*st.partP[i][j] + st.opp[i][j]**2 + W_OPP_P*st.opp[i][j]*st.oppP[i][j]; }
   if(st.R){ all.forEach(m=>{ const A=m.a.map(p=>st.idx[p]).filter(i=>i!==undefined), B=m.b.map(p=>st.idx[p]).filter(i=>i!==undefined); if(A.length&&B.length) s+=balCost(st,A,B); });
-    s+=W_LUCK*3*st.luck.reduce((a,v)=>a+v*v,0)/Math.max(1,st.games.reduce((a,b)=>a+b,0)/st.n); } // độ may cuối buổi càng đều càng tốt
+    s+=W_LUCK*8*st.luck.reduce((a,v)=>a+v*v,0)/Math.max(1,st.games.reduce((a,b)=>a+b,0)/st.n); } // độ may cuối buổi càng đều càng tốt
   // phạt ngồi nghỉ 2 vòng liên tiếp (người ưu tiên đã đủ trận thì về sớm, không phạt)
   const done=new Set((opt&&opt.prio)||[]);
   const rounds={}; all.forEach(m=>{(rounds[m.round]=rounds[m.round]||new Set()); [...m.a,...m.b].forEach(p=>rounds[m.round].add(p));});
@@ -789,7 +793,7 @@ function generateSchedule(players,roundsOrPlan,courts,history,startRound,iters,o
   const slots=plan.reduce((t,cs)=>t+cs.length,0)*per+history.reduce((t,m)=>t+[...m.a,...m.b].filter(p=>players.includes(p)).length,0);
   const o2={...opt,type,target:opt.prio&&opt.prio.length?Math.max(1,Math.floor(slots/players.length)):0};
   const L=plan.length, src=opt.late?plan.slice().reverse():plan; // đến trễ = xếp ngược từ cuối buổi
-  iters=iters||Math.max(150,Math.min(500,Math.round(6000/plan.length)));
+  iters=iters||Math.max(300,Math.min(1200,Math.round(12000/plan.length))); // tự thử nhiều phương án, giữ phương án công bằng nhất
   let best=null,bs=Infinity;
   for(let t=0;t<iters;t++){
     let res=buildOnce(players,src,opt.late?[]:history,startRound,o2);
@@ -843,6 +847,17 @@ function analyzeSchedule(players,matches){
   let maxPart=0, pairsUsed=0;
   for(let i=0;i<st.n;i++) for(let j=i+1;j<st.n;j++){ maxPart=Math.max(maxPart,st.part[i][j]); if(st.part[i][j]) pairsUsed++; }
   return {games:Object.fromEntries(players.map((p,i)=>[p,st.games[i]])),min:Math.min(...st.games),max:Math.max(...st.games),maxPart,pairsUsed,pairsTotal:st.n*(st.n-1)/2,evenAt,evenGames};
+}
+/** Trận DỰ TRÙ: sau lịch chính, thêm vài trận để ai cũng bằng số trận cao nhất. Đánh kịp thì nhập tỷ số, không thì chốt buổi sẽ tự bỏ. */
+function addReserve(players,main,courts,opt){
+  opt=opt||{}; const per=opt.type==='DON'?2:4, g={}; players.forEach(p=>g[p]=0);
+  main.forEach(m=>[...m.a,...m.b].filter(Boolean).forEach(p=>{ if(g[p]!==undefined) g[p]++; }));
+  const mx=Math.max(0,...Object.values(g)), need=players.reduce((t,p)=>t+(mx-g[p]),0); if(!need||!main.length) return [];
+  let k=Math.ceil(need/per); const cap=Math.max(1,Math.min(courts||1,capOf(players.length,opt.type||'DN',opt.female?players.filter(p=>opt.female.has(p)).length:0))), plan=[];
+  while(k>0){ const c=Math.min(cap,k); plan.push(Array.from({length:c},(_,i)=>i+1)); k-=c; }
+  const L=Math.max(...main.map(m=>m.round));
+  const r=generateSchedule(players,plan,cap,main,L+1,200,{...opt,prio:[],late:false});
+  return (r.matches||[]).map(m=>({...m,reserve:true}));
 }
 /*ALG-END*/
 
@@ -1000,6 +1015,7 @@ const Mock=(()=>{
   }
   function closeCore(sid,exp,by){
     const s=db.sessions.find(x=>x.id===sid);
+    if(db.matches.some(m=>m.sessionId===sid&&m.reserve&&!m.win)){ db.matches=db.matches.filter(m=>!(m.sessionId===sid&&m.reserve&&!m.win)); renum(sid); }
     Object.assign(s,{costSan:+exp.san||0,costNuoc:+exp.nuoc||0,costKhac:+exp.khac||0,costNote:exp.note||'',share:{...(exp.share||{}),enabled:!!(exp.share&&exp.share.enabled),rules:(exp.share&&exp.share.rules)||{},extra:(exp.share&&exp.share.extra)||[]},status:'CHOT',auto:true,closedBy:by,closedAt:nowStr()});
     syncCore(sid,by);
   }
@@ -1180,7 +1196,7 @@ const regularsFor=date=>{const ms=S.boot.members, mon=ms.filter(m=>monthlyOn(m.n
   return [...new Set([...mon,...ms.filter(m=>m.active).map(m=>m.name)])];};
 /** Mặc định điểm danh: người đánh tháng của tháng đó; tháng chưa ai đăng ký thì chọn sẵn mọi thường trực. */
 const defaultAttend=date=>{const regs=regularsFor(date),mon=regs.filter(p=>monthlyOn(p,date));return new Set(mon.length?mon:regs);};
-const roundTime=(s,m)=>addMin(s.start,(m.round-1)*s.minPer);
+const roundTime=(s,m)=>m.reserve?'Dự trù':addMin(s.start,(m.round-1)*s.minPer);
 /** Trạng thái buổi để tô màu: CHOT đã chốt (đỏ nhạt) · LIVE đang đánh (vàng) · PAST quá ngày chưa chốt (cam) · MO sắp đánh/đang mở (xanh lá). */
 function sessState(s){
   if(!s) return {k:'MO',t:'Đang mở'};
@@ -1287,6 +1303,12 @@ function luckOf(ms,R){
     T.forEach((p,i)=>{ const exp=(sum-r(p))/Math.max(1,ppl.length-1); L[p]=(L[p]||0)+(r(T[1-i])-exp)/100; n[p]=(n[p]||0)+1; }); }); });
   const out={}; Object.keys(L).forEach(p=>out[p]=Math.max(-8,Math.min(8,L[p]/n[p]*Math.min(6,1+n[p]/4)))); return out; // càng nhiều trận lệch → càng được bù mạnh, chặn ±8
 }
+/** Đồng đội TB so với mức chung: lịch sử → buổi này (để thấy ai được bù). */
+function mateLine(players,ms,date){ if(!balOn()||!S.allMatches) return ''; const {R}=skillRatings(date), r=p=>R[p]??1000;
+  const dev=(list,ppl)=>{ const sum=ppl.reduce((t,p)=>t+r(p),0), L={},n={}; list.forEach(m=>[m.a,m.b].forEach(T=>{ if(!T[0]||!T[1]) return; T.forEach((p,i)=>{ L[p]=(L[p]||0)+r(T[1-i])-(sum-r(p))/Math.max(1,ppl.length-1); n[p]=(n[p]||0)+1; }); })); const o={}; Object.keys(L).forEach(p=>o[p]=Math.round(L[p]/n[p])); return o; };
+  const hm=histMs(date), H=dev(hm,[...new Set(hm.flatMap(m=>[...m.a,...m.b]).filter(Boolean))]), T=dev(ms,players), g={}; ms.forEach(m=>[...m.a,...m.b].filter(Boolean).forEach(p=>g[p]=(g[p]||0)+1));
+  const f=v=>v===undefined?'–':(v>0?'+':'')+v;
+  return `<span>🤝 Đồng đội TB so với mức chung (lịch sử → buổi này): ${[...players].sort((a,b)=>(H[b]??0)-(H[a]??0)).map(p=>`${esc(p)} ${f(H[p])}→<b class="${(T[p]??0)<0?'neg':'pos'}">${f(T[p])}</b>${g[p]?`<small>(${g[p]} trận)</small>`:''}`).join(' · ')}</span>`; }
 /** Dòng tóm tắt độ cân trình của lịch. */
 function balLine(players,ms,date){ if(!balOn()||!S.allMatches) return ''; const {R}=skillRatings(date), r=p=>R[p]??1000;
   const gaps=ms.map(m=>{const A=m.a.filter(Boolean),B=m.b.filter(Boolean);return Math.abs(A.reduce((t,p)=>t+r(p),0)/A.length-B.reduce((t,p)=>t+r(p),0)/B.length);});
@@ -1326,7 +1348,7 @@ function viewMatches(){
   const s=S.session;
   if(!s) return `<div class="empty glass"><span class="ms">event_available</span><h2>Chưa có buổi đánh nào</h2><div class="sub">Bấm <b>Buổi mới</b> để điểm danh và xếp lịch xoay tour tự động.</div><button class="btn filled" data-act="newSession"><span class="ms">add</span>Tạo buổi đánh</button></div>`;
   const ms=S.matches, done=ms.filter(m=>m.win).length, pct=ms.length?Math.round(done*100/ms.length):0;
-  const an=analyzeSchedule(s.players,ms);
+  const an=analyzeSchedule(s.players,ms.filter(m=>!m.reserve));
   const end=addMin(s.start,s.duration);
   const even=an.evenAt&&an.evenAt<ms.length?`Hết giờ sớm? Dừng sau trận <b>#${an.evenAt}</b> thì ai cũng ${an.evenGames} trận`:`Mỗi người <b>${an.min===an.max?an.min:an.min+'–'+an.max}</b> trận`;
   const players=[...s.players].sort((a,b)=>a===S.me?-1:b===S.me?1:0);
@@ -1372,7 +1394,7 @@ function matchCard(m,q,nextId,expanded){
   const s=S.session, done=!!m.win, mc=s.courts>1;
   const ta=done?(m.win==='A'?'win':'lose'):'', tb=done?(m.win==='B'?'win':'lose'):'';
   const tag=done?'':m.id===nextId?'<span class="tag next">Sắp tới</span>':'<span class="tag todo">Chưa nhập</span>';
-  return `<div class="match glass ${mc?'tint '+cc(m.court):''} ${m.id===nextId?'next':''} ${expanded?'open':''}" data-act="score" data-id="${m.id}" role="button" tabindex="0">
+  return `<div class="match glass ${mc?'tint '+cc(m.court):''} ${m.reserve?'rsv':''} ${m.id===nextId?'next':''} ${expanded?'open':''}" data-act="score" data-id="${m.id}" role="button" tabindex="0">
     <div class="m-head"><span class="m-no">#${m.no}</span>${mc||s.courtNames?.length?`<span class="cbadge ${mc?cc(m.court):''}">${esc(courtName(s,m.court))}</span>`:''}<span>${roundTime(s,m)} · ${m.stage?STAGE_NAME[m.stage]:'Vòng '+m.round}</span>${mBadges(m,s,1)}<span class="sp"></span>${tag}
       ${expanded?`<button class="icon-btn collapse" data-act="collapse" aria-label="Thu gọn"><span class="ms">expand_less</span></button>`:''}</div>
     <div class="m-body">
@@ -1387,15 +1409,16 @@ function matchCard(m,q,nextId,expanded){
 function matchRow(m,q,nextId){
   const s=S.session, done=!!m.win, mc=s.courts>1;
   const A=m.win==='A'?'win':m.win?'lose':'', B=m.win==='B'?'win':m.win?'lose':'';
-  return `<button class="mrow ${mc?'tint '+cc(m.court):`z${m.no%2}`} ${m.id===nextId?'next':''} ${m.saving?'saving':''} ${m.saving==='queue'?'queued':''}" data-act="expand" data-id="${m.id}" aria-label="Trận ${m.no}">
+  return `<button class="mrow ${mc?'tint '+cc(m.court):`z${m.no%2}`} ${m.reserve?'rsv':''} ${m.id===nextId?'next':''} ${m.saving?'saving':''} ${m.saving==='queue'?'queued':''}" data-act="expand" data-id="${m.id}" aria-label="Trận ${m.no}">
     <span class="r-no">${m.no}${m.addedBy?`<i class="addby" title="${esc(m.addedBy)} thêm tay">✍</i>`:m.editedBy?`<i class="addby ed" title="${esc(m.editedBy)} sửa tay">✏</i>`:''}</span>${mc?`<span class="cbadge ${cc(m.court)}" title="${esc(courtName(s,m.court))}">${esc(courtShort(s,m.court))}</span>`:''}
     ${m.stage?`<span class="stg">${STAGE_SHORT[m.stage]}</span>`:''}<span class="r-team ${A}">${teamTxt(m,'a',q,'<i>·</i>')}</span>
-    <span class="r-score ${done?'':'empty'}">${done?`${m.sa}-${m.sb}`:'0-0'}${mBadges(m,s)}</span>
+    <span class="r-score ${done?'':'empty'}">${done?`${m.sa}-${m.sb}`:'0-0'}${mBadges(m,s)}${m.reserve?'<i class="mk rsvk">Dự trù</i>':''}</span>
     <span class="r-team b ${B}">${teamTxt(m,'b',q,'<i>·</i>')}</span></button>`;
 }
 function schedItems(s,ms){ const fr=(s&&s.freeSlots||[]).map(([round,court])=>({free:1,round,court})); return fr.length?[...ms,...fr].sort((a,b)=>a.round-b.round||a.court-b.court||(a.free?1:0)-(b.free?1:0)):ms; }
 function freeRow(s,f){ const mc=s.courts>1, ex=extraOf(s);
   return `<button class="mrow freerow ${mc?'tint '+cc(f.court):''}" ${s.status==='MO'?`data-act="addMatch" data-r="${f.round}" data-c="${f.court}"`:''} aria-label="Lượt đánh vui ${roundTime(s,f)}"><span class="r-no">🎲</span>${mc?`<span class="cbadge ${cc(f.court)}">${esc(courtShort(s,f.court))}</span>`:''}<span class="fr-t"><b>Đánh vui · tự cặp</b> <small>${roundTime(s,f)}${ex.length?' · '+esc(ex.join(', '))+' + người đang nghỉ':''}${s.status==='MO'?' · bấm để ghi trận':''}</small></span></button>`; }
+const RSV_HEAD=`<div class="rsv-head">⏳ Trận dự trù – để ai cũng đủ số trận. Còn giờ thì đánh & nhập tỷ số; hết giờ thì thôi, chốt buổi sẽ tự bỏ và buổi sau app bù lại.</div>`;
 function matchItem(m,q,nextId){
   if(m.free) return freeRow(S.session,m);
   if(S.view==='full') return matchCard(m,q,nextId,false);
@@ -1409,7 +1432,7 @@ function renderList(){
   const btn=$('#clearQ'); if(btn) btn.hidden=!S.q;
   document.querySelectorAll('.chips .chip').forEach(c=>c.classList.toggle('on',!!q&&fold(c.dataset.name)===q));
   const bar=`<div class="listbar">${courtLegend(S.session)}<div class="seg mini viewseg"><button data-act="view" data-v="compact" class="${S.view!=='full'?'on':''}" aria-label="Dạng gọn"><span class="ms">view_list</span>Gọn</button><button data-act="view" data-v="full" class="${S.view==='full'?'on':''}" aria-label="Dạng đầy đủ"><span class="ms">view_agenda</span>Đầy đủ</button></div></div>`;
-  if(!q){ el.innerHTML=bar+listWrap(schedItems(S.session,ms).map(m=>matchItem(m,'',next?.id)).join('')); return; }
+  if(!q){ el.innerHTML=bar+listWrap(schedItems(S.session,ms).map((m,i,arr)=>(m.reserve&&!(arr[i-1]||{}).reserve?RSV_HEAD:'')+matchItem(m,'',next?.id)).join('')); return; }
   const has=m=>[...m.a,...m.b].some(p=>fold(p).includes(q));
   const mine=ms.filter(has), todo=mine.filter(m=>!m.win), done=mine.filter(m=>m.win);
   const names=[...new Set(S.session.players.filter(p=>fold(p).includes(q)))];
@@ -2235,15 +2258,15 @@ function openCreate(){
       prev=`<div class="grp-wrap">${['A','B'].map(g=>`<div class="calc"><b>Bảng ${g}</b>${F.groups[g].map(id=>`<span>${esc(T[id].p.join(' – '))}${T[id].seed?` <span class="seed">HG${T[id].seed}</span>`:''}</span>`).join('')}</div>`).join('')}</div>
         ${over>0?`<div class="hint warn">Lịch giải cần ${last} lượt (~${last*F.minPer} phút), vượt giờ sân ${over} phút. Giảm phút/trận hoặc thêm sân.</div>`:''}
         <div class="prev">${F.preview.map(m=>`<div><b>#${m.no}</b><span><span class="stg">${STAGE_SHORT[m.stage]}</span> ${m.a[0]?esc(m.a.join(' & ')):`<em>${KO_LABEL[m.stage][0]}</em>`} <em>vs</em> ${m.b[0]?esc(m.b.join(' & ')):`<em>${KO_LABEL[m.stage][1]}</em>`}<br><em>${addMin(P.start,(m.round-1)*F.minPer)}${F.courts>1?' · '+esc(F.courtNames[m.court-1]||'Sân '+m.court):''}</em></span></div>`).join('')}</div>`; }
-    else if(F.preview){ const an=analyzeSchedule([...F.players],F.preview);
+    else if(F.preview){ const an=analyzeSchedule([...F.players],F.preview.filter(m=>!m.reserve)), nR=F.preview.filter(m=>m.reserve);
       const cy=(openCreate.rot()||{}).carry;
-      prev=`<div class="calc"><span>Số trận/người: ${Object.entries(an.games).map(([p,g])=>`${esc(p)} <b>${g}</b>${cy&&cy[p]?`<small>(${cy[p]>0?'dư':'thiếu'} ${String(Math.abs(Math.round(cy[p]*10)/10)).replace('.',',')})</small>`:''}`).join(' · ')}</span>
+      prev=`<div class="calc">${nR.length?`<span>⏳ <b>${nR.length} trận dự trù</b> (nền cam sọc) cho người đánh ít hơn: ${esc([...new Set(nR.flatMap(m=>[...m.a,...m.b]).filter(p=>p&&an.games[p]<an.max))].join(', '))} – còn giờ thì đánh, không thì thôi.</span>`:''}<span>Số trận/người: ${Object.entries(an.games).map(([p,g])=>`${esc(p)} <b>${g}</b>${cy&&cy[p]?`<small>(${cy[p]>0?'dư':'thiếu'} ${String(Math.abs(Math.round(cy[p]*10)/10)).replace('.',',')})</small>`:''}`).join(' · ')}</span>
         ${F.type==='DON'?'':`<span>Cặp đôi khác nhau: <b>${an.pairsUsed}/${an.pairsTotal}</b> · lặp cặp tối đa <b>${an.maxPart}</b> lần${an.evenAt?` · đều nhau sau trận #${an.evenAt}`:''}</span>`}
-        ${(()=>{ const r=openCreate.rot(); if(!r||F.type==='DON') return balLine([...F.players],F.preview,F.date); const now=pairCover([...F.players],F.preview);
+        ${(()=>{ const r=openCreate.rot(); if(!r||F.type==='DON') return balLine([...F.players],F.preview,F.date)+mateLine([...F.players],F.preview,F.date); const now=pairCover([...F.players],F.preview);
           const fresh=[...now.seen].filter(k=>!r.seen.has(k)).length, after=new Set([...r.seen,...now.seen]).size;
-          return balLine([...F.players],F.preview,F.date)+`<span>🔄 Xoay tour: buổi này <b>${fresh}/${now.seen.size}</b> cặp mới · chu kỳ đạt <b>${after}/${r.total}</b> cặp${after>=r.total?' ✅ đủ 100% – buổi sau bắt đầu vòng mới':` · còn ${r.total-after} cặp cho buổi sau`}</span>`; })()}
+          return balLine([...F.players],F.preview,F.date)+mateLine([...F.players],F.preview,F.date)+`<span>🔄 Xoay tour: buổi này <b>${fresh}/${now.seen.size}</b> cặp mới · chu kỳ đạt <b>${after}/${r.total}</b> cặp${after>=r.total?' ✅ đủ 100% – buổi sau bắt đầu vòng mới':` · còn ${r.total-after} cặp cho buổi sau`}</span>`; })()}
         ${F.prio.filter(p=>F.players.has(p)).length?`<span>${F.prioLate?'Đánh sau – trận đầu tiên':'Về sớm – xong trận cuối'}: ${F.prio.filter(p=>F.players.has(p)).map(p=>{const rs=F.preview.filter(m=>[...m.a,...m.b].includes(p)).map(m=>m.round);if(!rs.length)return esc(p)+' –';return `${esc(p)} <b>${F.prioLate?addMin(P.start,(Math.min(...rs)-1)*F.minPer):addMin(P.start,Math.max(...rs)*F.minPer)}</b>`;}).join(' · ')}</span>`:''}</div>
-        <div class="prev">${schedItems({freeSlots:F.free},F.preview).map(m=>m.free?`<div class="pfree"><b>🎲</b><span>Đánh vui · tự cặp<br><em>${addMin(P.start,(m.round-1)*F.minPer)}${F.courts>1?' · '+esc(F.courtNames[m.court-1]||'Sân '+m.court):''}</em></span></div>`:`<div><b>#${m.no}</b><span>${esc(tn(m.a))} <em>vs</em> ${esc(tn(m.b))}<br><em>${addMin(P.start,(m.round-1)*F.minPer)}${F.courts>1?' · '+esc(F.courtNames[m.court-1]||'Sân '+m.court):''}${m.rest.length?' · nghỉ: '+esc(m.rest.join(', ')):''}</em></span></div>`).join('')}</div>`; }
+        <div class="prev">${schedItems({freeSlots:F.free},F.preview).map(m=>m.free?`<div class="pfree"><b>🎲</b><span>Đánh vui · tự cặp<br><em>${addMin(P.start,(m.round-1)*F.minPer)}${F.courts>1?' · '+esc(F.courtNames[m.court-1]||'Sân '+m.court):''}</em></span></div>`:`<div class="${m.reserve?'prsv':''}"><b>#${m.no}</b><span>${esc(tn(m.a))} <em>vs</em> ${esc(tn(m.b))}<br><em>${m.reserve?'⏳ Dự trù':addMin(P.start,(m.round-1)*F.minPer)}${F.courts>1?' · '+esc(F.courtNames[m.court-1]||'Sân '+m.court):''}${m.rest.length?' · nghỉ: '+esc(m.rest.join(', ')):''}</em></span></div>`).join('')}</div>`; }
     $('#sheetBody').innerHTML=`
       <div class="sh-head"><div><h2>${cupMode?'Giải đấu mini':'Buổi đánh mới'}</h2><div class="sub">${cupMode?'Điểm danh → ghép đôi → hạt giống → chia bảng':'Điểm danh rồi bấm Xếp lịch'}</div></div><button class="icon-btn" data-act="closeSheet" aria-label="Đóng"><span class="ms">close</span></button></div>
       <div class="seg"><button data-act="fKind" data-v="" class="${cupMode?'':'on'}"><span class="ms">sports_tennis</span> Buổi thường</button><button data-act="fKind" data-v="GIAI" class="${cupMode?'on':''}"><span class="ms">emoji_events</span> Giải đấu mini</button></div>
@@ -2376,7 +2399,7 @@ const CreateActs={
   fGuest(){const F=openCreate.F,v=$('#fGuest').value.trim().toUpperCase();if(!v)return;F.touched=true;F.teams=[];if(!F.guests.includes(v)&&!regularsFor(F.date).includes(v))F.guests.push(v);F.players.add(v);F.preview=null;openCreate.draw();},
   fGen(){const F=openCreate.F;const players=[...F.players];const rounds=openCreate.plan().plan;
     if(F.kind==='GIAI'){ if(!F.teams.length) pairTeams(F,false); F.groups=drawGroups(F.teams); F.preview=genCup(F.teams,F.groups,rounds,F.courts); openCreate.draw(); return; }
-    const sp=openCreate.split(); const r=generateSchedule(players,sp.rows.map(x=>x.courts),F.courts,[],1,0,{type:F.type,female:F.female,prio:F.prio.filter(x=>F.players.has(x)),late:F.prioLate,...(()=>{const r=openCreate.rot();return r?{carry:r.carry,prior:r.prior}:{};})(),...balOpt(players,(openCreate.rot()||{}).cur,F.date)}); F.free=sp.free; F.preview=r.matches.map((m,i)=>({...m,no:i+1})); openCreate.draw();},
+    const sp=openCreate.split(); const r=generateSchedule(players,sp.rows.map(x=>x.courts),F.courts,[],1,0,{type:F.type,female:F.female,prio:F.prio.filter(x=>F.players.has(x)),late:F.prioLate,...(()=>{const r=openCreate.rot();return r?{carry:r.carry,prior:r.prior}:{};})(),...balOpt(players,(openCreate.rot()||{}).cur,F.date)}); F.free=sp.free; const main=r.matches.map((m,i)=>({...m,no:i+1})); const rs=F.type==='MIX'?[]:addReserve(players,main,F.courts,{type:F.type,female:F.female,...(()=>{const x=openCreate.rot();return x?{carry:x.carry,prior:x.prior}:{};})(),...balOpt(players,null,F.date)}); F.preview=main.concat(rs.map((m,i)=>({...m,no:main.length+i+1}))); openCreate.draw();},
   fSave(){const F=openCreate.F;needPin().then(pin=>(store.set('sopick_cnames',JSON.stringify(F.courtNames)),call('api_createSession',{date:F.date,start:openCreate.plan().start,duration:openCreate.plan().duration,courts:F.courts,courtNames:F.courtNames.slice(0,F.courts),courtTimes:F.times.slice(0,F.courts),courtPrice:F.price,minPer:F.minPer,fee:F.fee,players:[...F.players],matches:F.preview,
       costs:{san:F.san??openCreate.cost??0,nuoc:F.nuoc||0,khac:0,note:''},
       sessType:F.kind==='GIAI'?'THANG':openCreate.stype(),
@@ -2434,7 +2457,8 @@ function reschedulePlan(s,played,players,opt){
   const merged=[...played.map(m=>({...m,old:true})),...gen.map(m=>({...m,round:avail[m.round-1].round}))].sort((a,b)=>a.round-b.round||a.court-b.court);
   merged.forEach((m,i)=>m.no=i+1);
   reschedulePlan.renumber=merged.filter(m=>m.old).map(m=>({id:m.id,no:m.no}));
-  return merged.filter(m=>!m.old).map(({old,...m})=>m);
+  const rs=type==='MIX'?[]:addReserve(players,merged,s.courts,{type,female:fem,...balOpt(players,null,s.date)});
+  return merged.filter(m=>!m.old).map(({old,...m})=>m).concat(rs.map((m,i)=>({...m,no:merged.length+i+1})));
 }
 function openEdit(){
   if(!S.allMatches||S.amStale){ S.amStale=false; ensureAll().catch(()=>{}); }
@@ -2493,11 +2517,11 @@ function openEdit(){
         return `<div class="field"><label>Lịch mới cho ${E.preview.length} trận chưa đánh (trước: ${unplayed.length} trận)</label>
           <div class="seg mini">${[['type',`Lịch sử cùng loại (${STYPE[E.stype]})`],['all','Mọi buổi'],['off','Không xét']].map(([k,l])=>`<button data-act="eHist" data-v="${k}" class="${histScope()===k?'on':''}">${l}</button>`).join('')}</div>
           <div class="seg mini">${[['1','⚖️ Cân trình: Bật'],['0','Tắt']].map(([k,l])=>`<button data-act="eBal" data-v="${k}" class="${(balOn()?'1':'0')===k?'on':''}">${l}</button>`).join('')}</div>
-          <div class="calc">${balLine(ps,[...played.filter(m=>m.win),...E.preview],s.date)}<span>${(()=>{const an=analyzeSchedule(ps,[...played,...E.preview]);return `Cặp đôi khác nhau ${an.pairsUsed}/${an.pairsTotal} · lặp cặp tối đa ${an.maxPart} lần`;})()}</span></div>
+          <div class="calc">${balLine(ps,[...played.filter(m=>m.win),...E.preview],s.date)}${mateLine(ps,[...played,...E.preview],s.date)}<span>${(()=>{const an=analyzeSchedule(ps,[...played,...E.preview]);return `Cặp đôi khác nhau ${an.pairsUsed}/${an.pairsTotal} · lặp cặp tối đa ${an.maxPart} lần`;})()}</span></div>
           ${maxK<s.courts?`<div class="hint warn">${ps.length} người chỉ đủ đánh <b>${maxK} sân</b> cùng lúc (mỗi sân cần 4 người) nên số trận ít hơn. Thêm người để chạy đủ ${s.courts} sân.</div>`:''}
           <div class="sub">Số trận cả buổi/người: ${ps.map(p=>`${esc(p)} <b>${cnt[p]||0}</b>`).join(' · ')}</div>
           ${(E.free||[]).length?`<div class="sub">🎲 ${(E.free||[]).length} lượt sân đánh vui: ${E.free.map(f=>addMin(s.start,(f[0]-1)*s.minPer)+(s.courts>1?' '+esc(courtShort(s,f[1])):'')).join(' · ')}</div>`:''}
-          <div class="prev">${E.preview.map(m=>`<div><b>#${m.no}</b><span>${esc(tn(m.a))} <em>vs</em> ${esc(tn(m.b))}<br><em>${roundTime(s,m)}${s.courts>1?' · '+esc(courtName(s,m.court)):''}${m.rest&&m.rest.length?' · nghỉ: '+esc(m.rest.join(', ')):''}</em></span></div>`).join('')}</div>
+          <div class="prev">${E.preview.map(m=>`<div class="${m.reserve?'prsv':''}"><b>#${m.no}</b><span>${esc(tn(m.a))} <em>vs</em> ${esc(tn(m.b))}<br><em>${roundTime(s,m)}${s.courts>1?' · '+esc(courtName(s,m.court)):''}${m.rest&&m.rest.length?' · nghỉ: '+esc(m.rest.join(', ')):''}</em></span></div>`).join('')}</div>
           <button class="btn outline sm" data-act="eGen"><span class="ms">shuffle</span>Xếp lại lịch</button></div>`;})():''}
       <div class="calc"><span>Tiền thua: <b>${E.fee?kmoney(E.fee)+'/người/trận':'không tính (đánh vui)'}</b> · đã có ${played.length} trận tỷ số</span>
         ${base?`<span>Chi ${money(base)} → ${E.share?`chia <b>${kmoney(sh.per)}/người</b> · thu lại ${money(shareTot)}`:'không chia, quỹ/chủ hội chịu'}</span>`:'<span>Chưa nhập tiền sân</span>'}
