@@ -618,8 +618,8 @@ setTimeout(function(){if(!window.__SOPICK_END__){var v=document.getElementById('
 /* ====== CẤU HÌNH BẢN MOBILE ======
  * Dán link web app Apps Script (…/exec) vào giữa 2 dấu nháy dưới đây.
  * (Hoặc mở 1 lần: https://<tên>.github.io/<repo>/?api=<link …/exec> – app tự nhớ link trên máy đó.) */
-window.SOPICK_API = 'https://script.google.com/macros/s/AKfycbzMCwaADGiHB7Qfa1W0A3HytrMsPMJDR3s1j0qD3ehzgxl-A31paUxIBQps28KPuHhs/exec';
-window.SOPICK_BUILD = '30/10/2026 16:02';
+window.SOPICK_API = 'https://script.google.com/macros/s/AKfycbwADPV7P0z5tdS3jotiILErF3HKfY1NQrREnBI9sKxDpyDWP0kqo1D0kILbKMumAFvt/exec';
+window.SOPICK_BUILD = '30/10/2026 16:10';
 (function(){ var FILE=window.SOPICK_API; window.SOPICK_FILE_API=FILE;
   try{ var q=new URLSearchParams(location.search).get('api');
     if(q&&/^https:\/\/script\.google\.com\/.+\/exec$/.test(q)){ localStorage.setItem('sopick_api',q); localStorage.setItem('sopick_api_base',FILE); history.replaceState(null,'',location.pathname); }
@@ -856,7 +856,9 @@ function addReserve(players,main,courts,opt){
   let k=Math.ceil(need/per); const cap=Math.max(1,Math.min(courts||1,capOf(players.length,opt.type||'DN',opt.female?players.filter(p=>opt.female.has(p)).length:0))), plan=[];
   while(k>0){ const c=Math.min(cap,k); plan.push(Array.from({length:c},(_,i)=>i+1)); k-=c; }
   const L=Math.max(...main.map(m=>m.round));
-  const r=generateSchedule(players,plan,cap,main,L+1,200,{...opt,prio:[],late:false});
+  // người thiếu trận BẮT BUỘC vào trận dự trù (bỏ qua bù trận lịch sử); người vào cho đủ 4 = ai lịch sử đánh ít hơn
+  const carry={}; players.forEach(p=>carry[p]=g[p]<mx?-1000:((opt.carry||{})[p]||0));
+  const r=generateSchedule(players,plan,cap,main,L+1,200,{...opt,carry,prio:[],late:false});
   return (r.matches||[]).map(m=>({...m,reserve:true}));
 }
 /*ALG-END*/
