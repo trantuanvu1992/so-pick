@@ -670,8 +670,8 @@ setTimeout(function(){if(!window.__SOPICK_END__){var v=document.getElementById('
 /* ====== CẤU HÌNH BẢN MOBILE ======
  * Dán link web app Apps Script (…/exec) vào giữa 2 dấu nháy dưới đây.
  * (Hoặc mở 1 lần: https://<tên>.github.io/<repo>/?api=<link …/exec> – app tự nhớ link trên máy đó.) */
-window.SOPICK_API = 'https://script.google.com/macros/s/AKfycbyvrbLOkF3RipZoWKgRjva_z1NPCED8CBMtEOlOThsAlZDHtikeUBEApXpc-0yepqKe/exec';
-window.SOPICK_BUILD = '03/11/2026 11:04';
+window.SOPICK_API = 'https://script.google.com/macros/s/AKfycbwADPV7P0z5tdS3jotiILErF3HKfY1NQrREnBI9sKxDpyDWP0kqo1D0kILbKMumAFvt/exec';
+window.SOPICK_BUILD = '03/11/2026 11:39';
 (function(){ var FILE=window.SOPICK_API; window.SOPICK_FILE_API=FILE;
   try{ var q=new URLSearchParams(location.search).get('api');
     if(q&&/^https:\/\/script\.google\.com\/.+\/exec$/.test(q)){ localStorage.setItem('sopick_api',q); localStorage.setItem('sopick_api_base',FILE); history.replaceState(null,'',location.pathname); }
@@ -1256,7 +1256,9 @@ function fundSplit(L){
   const parts={fines:sum(l=>l.type==='THU'&&l.category==='Tiền thua'&&done(l)),monthly:sum(l=>l.type==='THU'&&l.category==='Quỹ tháng'&&done(l)),surplus,fundPay};
   parts.other=F-(parts.fines+parts.monthly+surplus-fundPay);
   // quỹ hội âm = quỹ chưa đủ tiền trả sân → phần âm đó cũng là chủ hội đang ứng thay quỹ
-  return {N:f.balance,O,Oexp,F,Fexp,dep,parts,srcs,surplusExp,pend:f.pend,OT:O+Math.max(0,-F),OTexp:Oexp+Math.max(0,-Fexp)};
+  // Ưu tiên trả chủ hội: tiền quỹ đang có dùng bù phần chủ hội ứng trước → quỹ chỉ "thật sự còn" khi chủ hội hết ứng
+  const OT=Math.max(0,O-F), OTexp=Math.max(0,Oexp-Fexp), Fnow=Math.max(0,F-O), Fuse=Math.min(Math.max(0,F),O);
+  return {N:f.balance,O,Oexp,F,Fexp,dep,parts,srcs,surplusExp,pend:f.pend,OT,OTexp,Fnow,Fuse};
 }
 /** Tiền thua/người của 1 trận: giao lưu = 0; trận có mức riêng thì theo trận; còn lại theo buổi. */
 const matchFee=(s,m)=>m.mode==='GL'?0:(m.fee!=null&&m.fee!==''?+m.fee:(+s.fee||0));
@@ -2963,7 +2965,7 @@ function debtsText(){
   const club=String(S.boot.settings.clubName||'Hội Pick').toUpperCase(), w=Math.max(...D.map(d=>d.name.length),4), aw=Math.max(...D.map(d=>kmoney(d.sum).length));
   const lines=[`💰 CÔNG NỢ ${club} | ${shortDate(todayStr())}`,...D.map((d,i)=>`${d.sum>0?'🔴':'🟢'} ${d.name.padEnd(w)}  ${kmoney(d.sum).padStart(aw)}`),
     '--------------------',`TỔNG NỢ: ${money(D.reduce((t,d)=>t+d.sum,0))}`];
-  { const FS=fundSplit(); lines.push('',`💰 Quỹ hội: ${FS.F<0?'−':''}${money(Math.abs(FS.F))} · ${ownerName()} đang ứng sân/nước: ${money(FS.O)}`); }
+  { const FS=fundSplit(); lines.push('',`💰 Quỹ hội hiện có: ${money(FS.Fnow)} · ${ownerName()} đang ứng: ${money(FS.OT)}`); }
   const CR=Object.entries(creditsOf()).filter(([n,v])=>v>0); if(CR.length) lines.push('',`💳 Đang gửi trước: ${CR.map(([n,v])=>`${n} ${kmoney(v)}`).join(' · ')}`);
   const b=bankBlock(); if(b) lines.push('',b);
   const qu=qrUrl('',0); if(qu) lines.push(`📷 Mã QR chuyển khoản: ${qu}`);
@@ -2995,16 +2997,18 @@ function openFundDetail(k){
       x.rem?kmoney(x.rem):'✓',x.rem?'neg':'pos',`ứng ${kmoney(x.cost)}${x.back?` · đã trả lại ${kmoney(x.back)}`:''}`); }).join('');
   const T={
     fund:['Quỹ hội', `${row('Tiền thua đã thu',sgn(P.fines),'pos')}${row('Quỹ tháng đã thu',sgn(P.monthly),'pos')}${P.surplus?row('Dư làm tròn tiền sân',sgn(P.surplus),'pos'):''}${P.fundPay?row('Quỹ trả tiền sân (sân tháng, TV tháng)',sgn(-P.fundPay),'neg'):''}${P.other?row('Thu / chi khác',sgn(P.other),P.other<0?'neg':'pos'):''}
-      <div class="od-row tot"><span>Quỹ hội</span><b class="${FS.F<0?'neg':'pos'}">${FS.F<0?'−':''}${money(Math.abs(FS.F))}</b></div>
-      <div class="sub">${FS.F<0?`Âm nghĩa là quỹ chưa đủ tiền trả sân → ${own} đang bỏ tiền ra trả thay phần này. Thu đủ quỹ tháng là hết âm.`:'Tiền của hội, dùng trả sân tháng, mua bóng, liên hoan…'}</div>`],
-    owner:[`${own} đang ứng`, `${srcs()}${FS.F<0?row('Ứng thay quỹ hội (quỹ chưa đủ trả sân)',kmoney(-FS.F),'neg'):''}
+      <div class="od-row"><span>Cộng</span><b>${FS.F<0?'−':''}${money(Math.abs(FS.F))}</b></div>
+      ${FS.Fuse?row(`Ưu tiên trả ${own} đang ứng`,sgn(-FS.Fuse),'neg','tiền sân/nước mọi người chưa trả lại'):''}
+      <div class="od-row tot"><span>Quỹ hội hiện có</span><b class="pos">${money(FS.Fnow)}</b></div>
+      <div class="sub">Tiền quỹ thu được trước hết dùng trả ${own} phần đang ứng. Hết ứng thì quỹ mới thật sự còn. Khi mọi người trả đủ: quỹ <b>${money(FS.Fexp)}</b>.</div>`],
+    owner:[`${own} đang ứng`, `${srcs()}${FS.F<0?row('Ứng thay quỹ hội (quỹ chưa đủ trả sân)',kmoney(-FS.F),'neg'):''}${FS.Fuse?row('Quỹ đã trả bớt (ưu tiên trả '+own+')',sgn(-FS.Fuse),'pos'):''}
       <div class="od-row tot"><span>Tổng ${own} đang bỏ ra</span><b class="neg">${money(FS.OT)}</b></div>
       <div class="sub"><em>Chưa chốt</em>: tiền sân đã ghi khi tạo buổi, chốt buổi xong mới chia cho từng người. <em>Quỹ tháng trả</em>: tính vào quỹ hội.</div>`],
     debt:['Mọi người còn nợ', `${debtsOf(L).map(d=>row(esc(d.name),kmoney(d.sum),'neg',d.groups.map(g=>esc(g.label)+' '+kmoney(g.sum)).join(' · '))).join('')}
       <div class="od-row tot"><span>Tổng</span><b class="neg">${money(FS.pend)}</b></div>
-      ${row('→ vào quỹ hội',sgn(FS.Fexp-FS.F),'pos','quỹ tháng, tiền thua, dư làm tròn')}${row(`→ trả lại ${own}`,kmoney(FS.O-FS.Oexp),'','tiền sân/nước, nợ cũ')}
+      ${(()=>{const toO=Math.min(FS.pend,FS.OT);return row(`→ trả ${own} trước`,kmoney(toO),'','phần còn ứng')+row('→ vào quỹ hội',sgn(FS.pend-toO),'pos','phần còn lại');})()}
       <button class="btn tonal" data-act="shareDebts"><span class="ms">campaign</span>Nhắc nợ cả hội</button>`],
-    after:['Khi mọi người trả đủ', `${row('Quỹ hội',`${FS.Fexp<0?'−':''}${money(Math.abs(FS.Fexp))}`,FS.Fexp<0?'neg':'pos',`hiện ${FS.F<0?'−':''}${kmoney(Math.abs(FS.F))} ${sgn(FS.Fexp-FS.F)}`)}
+    after:['Khi mọi người trả đủ', `${row('Quỹ hội',`${FS.Fexp<0?'−':''}${money(Math.abs(FS.Fexp))}`,FS.Fexp<0?'neg':'pos',`hiện ${kmoney(FS.Fnow)} ${sgn(FS.Fexp-FS.Fnow)}`)}
       ${row(`${own} còn ứng`,FS.OTexp?money(FS.OTexp):'0đ',FS.OTexp?'neg':'pos',`hiện ${kmoney(FS.OT)} − được trả ${kmoney(FS.OT-FS.OTexp)}`)}
       ${FS.OTexp?`<div class="sub">Phần ${own} còn ứng là tiền sân các buổi <b>chưa chốt</b> (chưa chia cho ai):</div>${FS.srcs.filter(x=>x.remExp).map(x=>row(x.dk?'Nợ cũ':`Buổi ${shortDate(x.date)}${x.closed?'':' <em>chưa chốt</em>'}`,kmoney(x.remExp),'neg')).join('')}<div class="sub">Chốt các buổi đó → mọi người nợ phần sân → trả xong là ${own} hết ứng.</div>`:''}`]
   }[k];
@@ -3134,12 +3138,12 @@ function viewFund(){
       const ring=pos.map(([n,v,c])=>{ const len=v/tot*C, seg=`<circle r="15.9" cx="21" cy="21" fill="none" stroke="${c}" stroke-width="6" stroke-dasharray="${len.toFixed(2)} ${(C-len).toFixed(2)}" stroke-dashoffset="${(-off).toFixed(2)}" transform="rotate(-90 21 21)"/>`; off+=len; return seg; }).join('');
       return `<div class="fcards">
       <button class="fcard ${FS.Fexp<0?'c-neg':'c-fund'}" data-act="fDet" data-k="after"><small>Quỹ hội <em>(khi thu đủ)</em></small><b>${FS.Fexp<0?'−':''}${money(Math.abs(FS.Fexp))}</b>
-        <span>Tiền thua ${kmoney(fin)} · Quỹ dư ${du<0?'−':''}${kmoney(Math.abs(du))} · Làm tròn ${kmoney(rnd)}</span><span>Đang có trong quỹ: ${FS.F<0?'−':''}${kmoney(Math.abs(FS.F))}</span></button>
+        <span>Tiền thua ${kmoney(fin)} · Quỹ dư ${du<0?'−':''}${kmoney(Math.abs(du))} · Làm tròn ${kmoney(rnd)}</span><span>Hiện có: <b style="font-size:inherit">${kmoney(FS.Fnow)}</b>${FS.Fuse?` (${kmoney(FS.Fuse)} đã trả ${esc(ownerName())} ứng)`:''}</span></button>
       <button class="fcard c-pie" data-act="fDet" data-k="fund"><small>Quỹ đến từ đâu</small>
         <div class="pie"><svg viewBox="0 0 42 42" width="54" height="54" aria-hidden="true"><circle r="15.9" cx="21" cy="21" fill="none" stroke="rgba(0,0,0,.07)" stroke-width="6"/>${ring}</svg>
         <div class="pie-l">${parts.map(([n,v,c])=>`<span><i style="background:${c}"></i>${n} <b>${v>0?Math.round(v*100/tot)+'%':'–'}</b></span>`).join('')}</div></div></button>
       <button class="fcard c-debt" data-act="fDet" data-k="debt"><small>Mọi người còn nợ</small><b>${money(FS.pend)}</b>
-        <span>${D.length} người · đã thu ${ratio}%</span><i class="fbar"><i style="width:${ratio}%"></i></i></button>
+        <span>${D.length} người · đã thu ${ratio}%</span><i class="fbar"><i style="width:${ratio}%"></i></i>${(()=>{const toO=Math.min(FS.pend,FS.OT),toF=FS.pend-toO;return FS.pend?`<span>Thu về: ${toO?`${kmoney(toO)} trả ${esc(ownerName())} trước · `:''}${kmoney(toF)} vào quỹ</span>`:'';})()}</button>
       <button class="fcard c-owner" data-act="fDet" data-k="owner"><small>${esc(ownerName())} đang ứng</small><b>${money(FS.OT)}</b>
         <span>${FS.OTexp?`Thu đủ còn ứng ${kmoney(FS.OTexp)}`:FS.OT?`Thu đủ là ${esc(ownerName())} hết ứng`:'Không ứng gì'}</span></button>
     </div>`; })()}
