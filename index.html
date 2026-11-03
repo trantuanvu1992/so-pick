@@ -413,8 +413,8 @@ button.prow{width:100%;text-align:left;font:inherit;color:inherit}
 .qs-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
 .qs-grid button{height:52px;border-radius:14px;background:var(--glass-hi);border:1px solid var(--glass-line);font-size:19px;font-weight:800}
 .qs-grid button:active{transform:scale(.96);background:var(--win-c)}.qs-grid .deuce{font-size:16px;color:var(--muted)}
-.qs-manual{border-radius:16px;padding:4px 2px}.qs-manual summary{cursor:pointer;font-weight:700;font-size:13.5px;color:var(--primary);padding:8px 4px}
-.qs-manual[open]{display:flex;flex-direction:column;gap:10px}
+.qs-manual{display:flex;flex-direction:column;gap:10px;border-radius:16px;padding:2px}
+.qs-quick{border-radius:16px;padding:4px 2px}.qs-quick summary{cursor:pointer;font-weight:700;font-size:13.5px;color:var(--primary);padding:8px 4px}.qs-quick[open]>.qs{margin-top:6px}
 .mrow.queued .r-score::after{content:'⏳';position:absolute;top:-9px;left:-8px;font-size:12px}
 .fparts{display:flex;flex-wrap:wrap;gap:6px 12px;font-size:12.5px;color:var(--muted);margin:2px 0 8px}.fparts b{font-weight:800}
 .fund-cmp.one{grid-template-columns:1fr}
@@ -444,6 +444,33 @@ button.prow{width:100%;text-align:left;font:inherit;color:inherit}
 .pie-l i{width:9px;height:9px;border-radius:3px;flex:0 0 auto}.pie-l b{font-size:12px;color:#1F2B2C;margin-left:auto;padding-left:4px}
 .fbar{display:block;width:100%;height:5px;border-radius:9px;background:rgba(0,0,0,.08);margin-top:4px;overflow:hidden}.fbar i{display:block;height:100%;background:#A3264A;border-radius:9px}
 .st-row.dep{opacity:.75}.st-row.dep b{color:var(--muted)}
+.rp{display:flex;flex-direction:column;gap:10px}.rp h3{margin:6px 2px 0}.rp h3 small{font-weight:600;text-transform:none;letter-spacing:0}
+.rp-hero{position:relative;background:linear-gradient(135deg,#0E6A6A,#1C8C7A);color:#fff;border-radius:22px;padding:12px 12px 14px}
+.rp-hero .icon-btn{color:#fff}.rp-hero .icon-btn[disabled]{opacity:.3}.rp-x{position:absolute;top:6px;right:6px}
+.rp-nav{display:flex;align-items:center;justify-content:center;gap:6px;text-align:center;padding-right:30px;padding-left:30px}.rp-nav small{font-size:10.5px;font-weight:800;letter-spacing:.08em;opacity:.8}.rp-nav h2{margin:0;font-size:21px;color:#fff}
+.rp-kpi{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:10px}.rp-kpi div{background:#ffffff22;border-radius:12px;padding:6px;text-align:center}.rp-kpi b{display:block;font-size:20px}.rp-kpi small{opacity:.85;font-size:11px}
+.rp-mvp{display:flex;align-items:center;gap:10px;padding:12px 14px;border-radius:20px;background:linear-gradient(135deg,#FFF1BF,#FFFAE6);border:1px solid #F3D77A}
+.rp-mvp>div{flex:1;min-width:0}.rp-mvp small{font-size:10.5px;font-weight:800;letter-spacing:.08em;color:#8A6400}.rp-mvp b{display:block;font-size:20px;color:#5A4200}.rp-mvp em{font-style:normal;font-size:12px;color:#6B5A2A}.rp-crown{font-size:30px}
+.rp-g2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.rp-c{background:var(--glass-hi,#fff);border:1px solid var(--glass-line);border-radius:18px;padding:11px 12px;display:flex;flex-direction:column;gap:3px;min-width:0}
+.rp-c>small{font-size:11.5px;font-weight:700;color:var(--muted)}.rp-c>b{font-size:19px;font-weight:800}.rp-c>em{font-style:normal;font-size:11px;color:var(--muted);line-height:1.3}
+.rp-c .dot{display:inline-block;width:8px;height:8px;border-radius:3px;vertical-align:0}
+.rp-bar,.rp-bar2{display:block;height:6px;border-radius:6px;background:rgba(0,0,0,.08);overflow:hidden}.rp-bar i{display:block;height:100%;background:#13724C}.rp-bar2 i{display:block;height:100%;background:#2F8F78}
+.rp-fund .rp-ln{display:flex;justify-content:space-between;font-size:13px;padding:2px 0}.rp-ln.tot{border-top:1px solid var(--hair);margin-top:2px;padding-top:5px;font-weight:800}
+.rp-hb{display:grid;grid-template-columns:18px 54px 1fr auto;align-items:center;gap:6px;font-size:12.5px;padding:4px 0;width:100%;text-align:left}
+.rp-rk{color:var(--muted);font-weight:800;font-size:11px}.rp-hb>b{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.rp-hb .t{height:10px;border-radius:6px;background:rgba(0,0,0,.06);overflow:hidden}.rp-hb .t i{display:block;height:100%;border-radius:6px}
+.rp-hb .v{white-space:nowrap;font-weight:800}.rp-hb .v small{font-weight:600;color:var(--muted)}.rp-hb .v em{font-style:normal;font-size:10.5px;margin-left:3px}
+.rp-aw{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.rp-a{border-radius:16px;padding:10px;display:flex;flex-direction:column;gap:1px;min-width:0;border:1px solid var(--glass-line)}
+.rp-a.gd{background:linear-gradient(135deg,#E3F6EE,#F6FCF9)}.rp-a.bd{background:linear-gradient(135deg,#FFE5EC,#FFF6F8)}
+.rp-ic{font-size:20px;line-height:1.1}.rp-a small{font-size:10.5px;font-weight:800;letter-spacing:.04em;text-transform:uppercase;color:#4F5B5D}
+.rp-a b{font-size:14.5px;color:#14292A;overflow-wrap:anywhere}.rp-a em{font-style:normal;font-size:11.5px;color:#4F5B5D}
+.rp-notes span{font-size:13px;line-height:1.5}
+.rp-rule{font-size:12px;color:var(--muted);padding:0 4px}.rp-rule summary{cursor:pointer;font-weight:700}.rp-rule span{display:block;margin-top:4px}
+.rp-entry{display:flex;gap:8px;overflow-x:auto;padding:2px 2px 6px}
+.rp-mchip{flex:0 0 auto;display:flex;flex-direction:column;align-items:flex-start;padding:10px 14px;border-radius:16px;background:var(--glass-hi,#fff);border:1px solid var(--glass-line);box-shadow:var(--shadow)}
+.rp-mchip.on{background:linear-gradient(135deg,#0E6A6A,#1C8C7A);color:#fff}.rp-mchip small{font-size:11px;opacity:.8}
 .od-row.tot{border-top:2px solid var(--hair);border-bottom:0;font-weight:800;padding-top:8px;margin-top:2px}
 .fcard small,.fcard>span{color:#4F5B5D}
 .sttag{display:inline-flex;align-items:center;gap:2px;font-size:10.5px;font-weight:800;padding:1px 7px;border-radius:7px;letter-spacing:0;text-transform:none;vertical-align:1px}
@@ -466,8 +493,18 @@ button.prow{width:100%;text-align:left;font:inherit;color:inherit}
 .r-team{font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
 .r-team i{font-style:normal;color:var(--muted);margin:0 2px}
 .r-team.b{text-align:right}
-.r-team.win{color:var(--win)}
-.r-team.lose{color:color-mix(in srgb,var(--fg) 55%,transparent);font-weight:600}
+.r-team.win{color:var(--win);font-weight:900}
+.r-team.win .nm{background:color-mix(in srgb,var(--win) 20%,transparent);box-shadow:inset 0 0 0 1.5px color-mix(in srgb,var(--win) 45%,transparent)}
+.r-team.lose{color:color-mix(in srgb,var(--fg) 45%,transparent);font-weight:600}.r-team.lose .nm{background:transparent}
+.mrow:has(.r-team.win) .r-score{background:var(--win);color:#fff}
+@media(max-width:600px){
+  .mrow{gap:4px;padding:0 6px 0 4px;font-size:13px}
+  .mrow.tint{grid-template-columns:18px 6px minmax(0,1fr) auto minmax(0,1fr)}
+  .mrow:not(.tint){grid-template-columns:18px minmax(0,1fr) auto minmax(0,1fr)}
+  .mrow .cbadge{font-size:0;padding:0;width:6px;min-width:6px;max-width:6px;height:24px;border-radius:3px}
+  .r-no{font-size:11px}.r-team .nm{padding:1px 3px}.r-team i{margin:0 1px}
+  .r-score{min-width:40px;padding:3px 4px}
+}
 .r-team mark{background:var(--ball);color:var(--on-ball);border-radius:3px;padding:0 2px}
 .r-score{font-weight:800;min-width:44px;text-align:center;padding:3px 6px;border-radius:8px;background:var(--glass-hi)}
 .r-score.empty{color:var(--muted);font-weight:600;background:transparent;border:1px dashed color-mix(in srgb,var(--fg) 22%,transparent)}
@@ -624,8 +661,8 @@ setTimeout(function(){if(!window.__SOPICK_END__){var v=document.getElementById('
 /* ====== CẤU HÌNH BẢN MOBILE ======
  * Dán link web app Apps Script (…/exec) vào giữa 2 dấu nháy dưới đây.
  * (Hoặc mở 1 lần: https://<tên>.github.io/<repo>/?api=<link …/exec> – app tự nhớ link trên máy đó.) */
-window.SOPICK_API = 'https://script.google.com/macros/s/AKfycbykYhoQS0Q22VaAWpTA2p0f5sBRPfRyKzpqtw-3SskJRstwQ0BMiu10x3kCJQf0a1Fa/exec';
-window.SOPICK_BUILD = '03/11/2026 09:56';
+window.SOPICK_API = 'https://script.google.com/macros/s/AKfycbwADPV7P0z5tdS3jotiILErF3HKfY1NQrREnBI9sKxDpyDWP0kqo1D0kILbKMumAFvt/exec';
+window.SOPICK_BUILD = '03/11/2026 10:43';
 (function(){ var FILE=window.SOPICK_API; window.SOPICK_FILE_API=FILE;
   try{ var q=new URLSearchParams(location.search).get('api');
     if(q&&/^https:\/\/script\.google\.com\/.+\/exec$/.test(q)){ localStorage.setItem('sopick_api',q); localStorage.setItem('sopick_api_base',FILE); history.replaceState(null,'',location.pathname); }
@@ -1446,7 +1483,7 @@ function matchCard(m,q,nextId,expanded){
 function matchRow(m,q,nextId){
   const s=S.session, done=!!m.win, mc=s.courts>1;
   const A=m.win==='A'?'win':m.win?'lose':'', B=m.win==='B'?'win':m.win?'lose':'';
-  return `<button class="mrow ${mc?'tint '+cc(m.court):`z${m.no%2}`} ${m.reserve?'rsv':''} ${m.id===nextId?'next':''} ${m.saving?'saving':''} ${m.saving==='queue'?'queued':''}" data-act="expand" data-id="${m.id}" aria-label="Trận ${m.no}">
+  return `<button class="mrow ${mc?'tint '+cc(m.court):`z${m.no%2}`} ${m.reserve?'rsv':''} ${m.id===nextId?'next':''} ${m.saving?'saving':''} ${m.saving==='queue'?'queued':''}" data-act="${s.status==='MO'?'score':'expand'}" data-id="${m.id}" aria-label="Trận ${m.no}${s.status==='MO'?' – nhập tỷ số':''}">
     <span class="r-no">${m.no}${m.addedBy?`<i class="addby" title="${esc(m.addedBy)} thêm tay">✍</i>`:m.editedBy?`<i class="addby ed" title="${esc(m.editedBy)} sửa tay">✏</i>`:''}</span>${mc?`<span class="cbadge ${cc(m.court)}" title="${esc(courtName(s,m.court))}">${esc(courtShort(s,m.court))}</span>`:''}
     ${m.stage?`<span class="stg">${STAGE_SHORT[m.stage]}</span>`:''}<span class="r-team ${A}">${teamTxt(m,'a',q,'<i>·</i>')}</span>
     <span class="r-score ${done?'':'empty'}">${done?`${m.sa}-${m.sb}`:'0-0'}${mBadges(m,s)}${m.reserve?'<i class="mk rsvk">Dự trù</i>':''}</span>
@@ -1673,7 +1710,144 @@ function viewHistory(){
   ${SL.length?`<div class="panel glass">${SL.map(s=>{const x=pd(s.date);const cost=s.costSan+s.costNuoc+s.costKhac;
     return `<button class="srow" data-act="openSession" data-id="${s.id}">${dateBox(s)}
     <div class="pname">${s.players.length} người · ${s.doneCount}/${s.matchCount} trận<small>${stTag(s)} ${s.status==='CHOT'||s.auto?`${s.fee?'Thua '+kmoney(s.totalIn):'Đánh vui'}${s.share?.enabled&&s.share.per?` · sân ${kmoney(s.share.per)}/ng`:''} · Chi ${kmoney(cost)}`:'Chưa nhập tiền sân'}</small></div>
-    <span class="status ${sessState(s).k}">${sessState(s).t}</span></button>`;}).join('')}</div>`:`<div class="empty glass"><span class="ms">history</span><b>Chưa có lịch sử</b></div>`}`;
+    <span class="status ${sessState(s).k}">${sessState(s).t}</span></button>`;}).join('')}</div>`:`<div class="empty glass"><span class="ms">history</span><b>Chưa có lịch sử</b></div>`}
+  ${reportMonths().length?`<h3>📊 Báo cáo tháng</h3><div class="rp-entry">${reportMonths().slice(0,6).map((m,i)=>`<button class="rp-mchip ${i?'':'on'}" data-act="rpOpen" data-m="${m}"><b>Tháng ${monthLabel(m)}</b><small>${m<curMonth()?'Đã chốt':'Tạm tính'}</small></button>`).join('')}</div>`:''}`;
+}
+
+/* ====================== BÁO CÁO THÁNG ====================== */
+/** Các tháng có buổi đã đánh (sổ chính thức), mới nhất trước. */
+function reportMonths(){ return [...new Set(S.boot.sessions.filter(s=>!isTrial(s)&&s.doneCount).map(s=>s.date.slice(0,7)))].sort().reverse(); }
+/** Số liệu thi đấu 1 tháng: điểm = thắng×3 + buổi×6 (giống BXH), không tính giao lưu. */
+function monthPlay(mon){
+  const ss={}; S.boot.sessions.filter(s=>!isTrial(s)&&s.doneCount&&s.date.slice(0,7)===mon).forEach(s=>ss[s.id]=s);
+  const ms=(S.allMatches||[]).map(amObj).filter(m=>ss[m.sid]&&m.win&&m.mode!=='GL').map(m=>({...m,date:ss[m.sid].date}))
+    .sort((a,b)=>(a.date+String(a.no).padStart(3,'0')).localeCompare(b.date+String(b.no).padStart(3,'0')));
+  const P={}, g=n=>P[n]||(P[n]={name:n,att:0,p:0,w:0,l:0,pf:0,pa:0,st:0,best:0,ls:0,worst:0,egg:0}), pair={}, H={};
+  Object.values(ss).forEach(s=>s.players.forEach(p=>g(p).att++));
+  ms.forEach(m=>{ const A=m.a.filter(Boolean),B=m.b.filter(Boolean);
+    [[A,B,m.win==='A',+m.sa,+m.sb],[B,A,m.win==='B',+m.sb,+m.sa]].forEach(([T,O,won,f,a])=>{
+      T.forEach(p=>{ const x=g(p); x.p++; x.pf+=f; x.pa+=a; if(won){x.w++;x.st++;x.best=Math.max(x.best,x.st);x.ls=0;} else {x.l++;x.ls++;x.worst=Math.max(x.worst,x.ls);x.st=0; if(f<=3) x.egg++;}
+        O.forEach(o=>{ const h=(H[p]=H[p]||{})[o]=(H[p]||{})[o]||{w:0,l:0}; won?h.w++:h.l++; }); });
+      if(T.length===2){ const k=[...T].sort().join(' & '), q=pair[k]||(pair[k]={k,n:0,w:0}); q.n++; if(won) q.w++; } }); });
+  const list=Object.values(P).map(x=>({...x,pts:x.w*3+x.att*6,rate:x.p?x.w/x.p:0,diff:x.pf-x.pa}))
+    .sort((a,b)=>b.pts-a.pts||b.w-a.w||b.diff-a.diff||a.name.localeCompare(b.name));
+  const minG=Math.max(3,Math.round(list.reduce((t,x)=>t+x.p,0)/(list.length||1)*0.5));
+  return {ss,ms,list,pair,H,minG,nS:Object.keys(ss).length};
+}
+/** Tài chính 1 tháng: chỉ tính khoản của các buổi trong tháng; quỹ tháng sau tách riêng. */
+function monthMoney(mon,ss){
+  const L=S.boot.ledger, inS=l=>ss[l.sessionId];
+  const due=L.filter(l=>inS(l)&&l.type==='THU'&&(l.category==='Chia sân/nước'||l.category==='Tiền thua'));
+  const sum=(a,f)=>a.filter(f||(()=>1)).reduce((t,l)=>t+l.amount,0);
+  const share=sum(due,l=>l.category==='Chia sân/nước'), fine=sum(due,l=>l.category==='Tiền thua'), paid=sum(due,l=>l.status!=='CHUA_DONG');
+  const chi=L.filter(l=>inS(l)&&l.type==='CHI'), san=sum(chi,l=>l.category==='Tiền sân'), nuoc=sum(chi,l=>l.category==='Nước'), khac=sum(chi,l=>l.category!=='Tiền sân'&&l.category!=='Nước');
+  let fundPay=0, round=0; const per=[];
+  Object.values(ss).forEach(s=>{ const cost=sum(chi,l=>l.sessionId===s.id), sh=sum(due,l=>l.sessionId===s.id&&l.category==='Chia sân/nước'), fi=sum(due,l=>l.sessionId===s.id&&l.category==='Tiền thua');
+    const quyTra=s.share&&s.share.enabled===false&&!isAutoThang(s), fp=quyTra?cost:((shareInfo(s)||{}).fund||0); fundPay+=fp; round+=Math.max(0,sh+fp-cost);
+    per.push({s,cost,thu:sh+fi}); });
+  const qt=L.filter(l=>l.sessionId==='QT-'+mon), qtPaid=sum(qt,l=>l.status!=='CHUA_DONG');
+  const nx=L.filter(l=>l.sessionId==='QT-'+shiftMonth(mon,1)), nxPaid=nx.filter(l=>l.status!=='CHUA_DONG');
+  const payers={}; due.filter(l=>l.status!=='CHUA_DONG').forEach(l=>payers[l.person]=(payers[l.person]||0)+l.amount);
+  const debtors=new Set(due.filter(l=>l.status==='CHUA_DONG').map(l=>l.person));
+  return {share,fine,owe:share+fine,paid,left:share+fine-paid,san,nuoc,khac,chi:san+nuoc+khac,fundPay,round,qt:sum(qt),qtPaid,
+    nx:{n:nx.length,paid:nxPaid.length,amt:nxPaid.reduce((t,l)=>t+l.amount,0)},payers,debtors:debtors.size,per:per.sort((a,b)=>a.s.date.localeCompare(b.s.date)),
+    net:fine+round+qtPaid-fundPay};
+}
+/** Giải thưởng tháng: mỗi người tối đa 1 giải mỗi nhóm; giải kỹ thuật chỉ trao khi đủ dữ liệu. */
+function monthAwards(mon,P){
+  const L=P.list, el=L.filter(x=>x.p>=P.minG), used=new Set(), pick=(arr,f,ok)=>{ const c=arr.filter(x=>!used.has(x.name)&&(!ok||ok(x))).sort((a,b)=>f(b)-f(a))[0]; if(c) used.add(c.name); return c; };
+  const R0=skillRatings(mon+'-01').R, R1=skillRatings(shiftMonth(mon,1)+'-01').R, dE=n=>Math.round((R1[n]??1000)-(R0[n]??1000));
+  const mvp=el[0]||L[0]; if(mvp) used.add(mvp.name);
+  const good=[], bad=[];
+  const g1=pick(el,x=>dE(x.name),x=>dE(x.name)>0); if(g1) good.push(['📈','Tiến bộ nhất',g1.name,`Trình +${dE(g1.name)}`]);
+  const g2=pick(el,x=>x.diff/x.p,x=>x.diff>0); if(g2) good.push(['⚡','Hiệu quả nhất',g2.name,`${Math.round(g2.rate*100)}% thắng · HS +${(g2.diff/g2.p).toFixed(1).replace('.',',')}/trận`]);
+  const g3=pick(L,x=>x.best*100+x.w,x=>x.best>=3); if(g3) good.push(['🔥','Bất bại',g3.name,`Thắng ${g3.best} trận liền`]);
+  let kt=null; Object.entries(P.H).forEach(([a,o])=>Object.entries(o).forEach(([b,r])=>{ if(r.l===0&&r.w>=3&&(!kt||r.w>kt.w)&&!used.has(a)) kt={a,b,w:r.w}; }));
+  if(kt){ used.add(kt.a); good.push(['⚔️','Khắc tinh',kt.a,`Thắng ${kt.b} ${kt.w}/${kt.w}`]); }
+  const full=L.filter(x=>x.att===P.nS&&P.nS>=2).map(x=>x.name); if(full.length) good.push(['📅','Chuyên cần',full.join(' · '),`Đủ ${P.nS}/${P.nS} buổi`]);
+  const pr=Object.values(P.pair).filter(x=>x.n>=2).sort((a,b)=>b.w/b.n-a.w/a.n||b.n-a.n)[0]; if(pr&&pr.w/pr.n>=.6) good.push(['🤝','Cặp ăn ý',pr.k,`Thắng ${pr.w}/${pr.n} trận`]);
+  const used2=new Set([mvp&&mvp.name]), pick2=(arr,f,ok)=>{ const c=arr.filter(x=>!used2.has(x.name)&&(!ok||ok(x))).sort((a,b)=>f(b)-f(a))[0]; if(c) used2.add(c.name); return c; };
+  const b1=pick2(el,x=>-x.rate*1000-x.diff); if(b1) bad.push(['🐢','Rùa tháng',b1.name,`${b1.w}T – ${b1.l}B`]);
+  const b2=pick2(L,x=>-dE(x.name),x=>dE(x.name)<0); if(b2) bad.push(['📉','Tụt dốc',b2.name,`Trình ${dE(b2.name)}`]);
+  const b3=pick2(L,x=>x.l,x=>x.l>=3); if(b3) bad.push(['💸','Nhà tài trợ',b3.name,`Góp ${b3.l} trận thua cho quỹ`]);
+  const b4=pick2(L,x=>x.worst*100+x.l,x=>x.worst>=3); if(b4) bad.push(['⛓️','Chuỗi thua',b4.name,`Thua ${b4.worst} trận liền`]);
+  const b5=pick2(L,x=>x.egg,x=>x.egg>=2); if(b5) bad.push(['🎁','Thánh tặng quà',b5.name,`${b5.egg} trận chỉ ghi ≤ 3 điểm`]);
+  return {mvp,good,bad,dE};
+}
+const rpK=v=>kmoney(v);
+function openReport(mon){
+  const months=reportMonths(); if(!months.length){ toast('Chưa có buổi nào để báo cáo'); return; }
+  if(!S.allMatches){ ensureAll().then(()=>openReport(mon)).catch(fail); return; }
+  mon=mon||(new Date().getDate()<=7&&months.includes(shiftMonth(curMonth(),-1))?shiftMonth(curMonth(),-1):months[0]);
+  const i=months.indexOf(mon), prev=months[i+1], next=months[i-1], done=mon<curMonth();
+  const P=monthPlay(mon), M=monthMoney(mon,P.ss), A=monthAwards(mon,P), L=P.list, mvp=A.mvp;
+  const lastP=prev?monthPlay(prev).list:[], lastRank={}; lastP.forEach((x,k)=>lastRank[x.name]=k+1);
+  const nP=L.length, pct=M.owe?Math.round(M.paid*100/M.owe):100;
+  const C=2*Math.PI*15.9; let off=0; const parts=[['Sân/nước',M.share,'#6C8EEF'],['Tiền thua',M.fine,'#E0A43A']].filter(x=>x[1]>0), tot=parts.reduce((t,x)=>t+x[1],0)||1;
+  const ring=parts.map(([n,v,c])=>{const len=v/tot*C,o=`<circle r="15.9" cx="21" cy="21" fill="none" stroke="${c}" stroke-width="6" stroke-dasharray="${len.toFixed(2)} ${(C-len).toFixed(2)}" stroke-dashoffset="${(-off).toFixed(2)}" transform="rotate(-90 21 21)"/>`;off+=len;return o;}).join('');
+  const mx=Math.max(1,...M.per.map(x=>Math.max(x.cost,x.thu))), bw=Math.min(34,Math.floor(300/Math.max(1,M.per.length)/2.6));
+  const bars=M.per.map((x,k)=>{ const X=10+k*(330/Math.max(1,M.per.length)), h1=Math.round(x.cost/mx*78), h2=Math.round(x.thu/mx*78);
+    return `<rect x="${X}" y="${90-h1}" width="${bw}" height="${h1}" rx="4" fill="#E86A5E"/><rect x="${X+bw+3}" y="${90-h2}" width="${bw}" height="${h2}" rx="4" fill="#2F8F78"/>
+      <text x="${X}" y="104" font-size="9.5" fill="#5B6E70">${shortDate(x.s.date)}</text>
+      <text x="${X}" y="${86-h1}" font-size="8.5" font-weight="700" fill="#14292A">${rpK(x.cost)}</text><text x="${X+bw+3}" y="${86-h2-(Math.abs(h1-h2)<10?9:0)}" font-size="8.5" font-weight="700" fill="#14292A">${rpK(x.thu)}</text>`; }).join('');
+  const topN=S.rpAll?L:L.slice(0,6), maxPts=Math.max(1,...L.map(x=>x.pts));
+  const aw=(a,cls)=>`<div class="rp-a ${cls}"><span class="rp-ic">${a[0]}</span><small>${a[1]}</small><b>${esc(a[2])}</b><em>${esc(a[3])}</em></div>`;
+  const notes=[`${P.nS} buổi · ${P.ms.length} trận · ${nP} người`, M.owe?`Đã thu ${pct}%${M.left?` – còn ${rpK(M.left)} chưa thu`:' – thu đủ 👏'}`:'', M.chi?`Tiền sân chiếm ${Math.round(M.san*100/M.chi)}% chi`:'', M.nx.n?`Tháng ${monthLabel(shiftMonth(mon,1))}: ${M.nx.paid}/${M.nx.n} người đã đóng quỹ tháng`:''].filter(Boolean);
+  S.rpMon=mon;
+  openSheet(`<div class="rp">
+    <div class="rp-hero"><div class="rp-nav"><button class="icon-btn" ${prev?`data-act="rpMon" data-m="${prev}"`:'disabled'} aria-label="Tháng trước"><span class="ms">chevron_left</span></button>
+      <div><small>BÁO CÁO THÁNG${done?'':' · TẠM TÍNH'}</small><h2>Tháng ${monthLabel(mon)}</h2></div>
+      <button class="icon-btn" ${next?`data-act="rpMon" data-m="${next}"`:'disabled'} aria-label="Tháng sau"><span class="ms">chevron_right</span></button></div>
+      <div class="rp-kpi"><div><b>${P.nS}</b><small>buổi</small></div><div><b>${P.ms.length}</b><small>trận</small></div><div><b>${nP}</b><small>người</small></div></div>
+      <button class="icon-btn rp-x" data-act="closeSheet" aria-label="Đóng"><span class="ms">close</span></button></div>
+
+    ${mvp?`<div class="rp-mvp"><span class="rp-crown">👑</span><div><small>MVP THÁNG</small><b>${esc(mvp.name)}</b>
+      <em>${mvp.w}T–${mvp.l}B · ${Math.round(mvp.rate*100)}% · ${mvp.pts} điểm · HS ${mvp.diff>0?'+':''}${mvp.diff}</em></div>${avatar(mvp.name,46)}</div>`:''}
+
+    <h3>💰 Tiền</h3>
+    <div class="rp-g2">
+      <div class="rp-c"><small>Phải thu</small><b>${rpK(M.owe)}</b><em>sân/nước + tiền thua</em></div>
+      <div class="rp-c"><small>Đã thu</small><b class="pos">${rpK(M.paid)}</b><i class="rp-bar"><i style="width:${pct}%"></i></i><em>${pct}% · còn ${rpK(M.left)}</em></div>
+      <div class="rp-c"><small>Chi sân/nước</small><b class="neg">${rpK(M.chi)}</b><i class="rp-bar2"><i style="width:${M.chi?Math.round(M.san*100/M.chi):0}%"></i></i><em>Sân ${rpK(M.san)} · Nước ${rpK(M.nuoc)}${M.khac?' · Khác '+rpK(M.khac):''}</em></div>
+      <div class="rp-c"><small>Phải thu gồm</small><div class="pie"><svg viewBox="0 0 42 42" width="46" height="46"><circle r="15.9" cx="21" cy="21" fill="none" stroke="rgba(0,0,0,.07)" stroke-width="6"/>${ring}</svg>
+        <div class="pie-l">${[['Sân/nước',M.share,'#6C8EEF'],['Tiền thua',M.fine,'#E0A43A']].map(([n,v,c])=>`<span><i style="background:${c}"></i>${n} <b>${Math.round(v*100/tot)}%</b></span>`).join('')}</div></div></div>
+    </div>
+    ${M.per.length?`<div class="rp-c"><small>Từng buổi: chi <i class="dot" style="background:#E86A5E"></i> · phải thu <i class="dot" style="background:#2F8F78"></i></small>
+      <svg width="100%" viewBox="0 -6 350 114">${bars}</svg></div>`:''}
+    <div class="rp-c rp-fund"><small>Quỹ hội tháng này</small>
+      <div class="rp-ln"><span>Tiền thua</span><b class="pos">+${rpK(M.fine)}</b></div>
+      ${M.round?`<div class="rp-ln"><span>Làm tròn dư</span><b class="pos">+${rpK(M.round)}</b></div>`:''}
+      ${M.qtPaid?`<div class="rp-ln"><span>Quỹ tháng ${monthLabel(mon)}</span><b class="pos">+${rpK(M.qtPaid)}</b></div>`:''}
+      ${M.fundPay?`<div class="rp-ln"><span>Quỹ trả sân</span><b class="neg">−${rpK(M.fundPay)}</b></div>`:''}
+      <div class="rp-ln tot"><span>Cộng vào quỹ</span><b>${M.net<0?'−':'+'}${rpK(Math.abs(M.net))}</b></div>
+      ${M.nx.n?`<em>Đóng trước quỹ tháng ${monthLabel(shiftMonth(mon,1))}: ${rpK(M.nx.amt)} (${M.nx.paid}/${M.nx.n} người) – tính cho tháng sau.</em>`:''}</div>
+
+    <h3>🏅 Bảng điểm</h3>
+    <div class="rp-c">${topN.map((x,k)=>{ const lr=lastRank[x.name], mv=lr?lr-(k+1):null;
+      return `<button class="rp-hb" data-act="player" data-name="${esc(x.name)}"><span class="rp-rk">${k+1}</span><b>${esc(x.name)}</b><span class="t"><i style="width:${Math.round(x.pts*100/maxPts)}%;background:${k===0?'#E0A43A':k<3?'#2F8F78':'#7FB8E8'}"></i></span>
+        <span class="v">${x.pts}đ <small>${x.w}-${x.l}</small>${mv?`<em class="${mv>0?'pos':'neg'}">${mv>0?'▲':'▼'}${Math.abs(mv)}</em>`:''}</span></button>`; }).join('')}
+      ${L.length>6?`<button class="btn text sm" data-act="rpAll">${S.rpAll?'Thu gọn':`Xem cả ${L.length} người`}</button>`:''}</div>
+
+    ${A.good.length?`<h3>🏆 Vinh danh</h3><div class="rp-aw">${A.good.map(a=>aw(a,'gd')).join('')}</div>`:''}
+    ${A.bad.length?`<h3>🙈 Vinh danh ngược <small>(vui thôi)</small></h3><div class="rp-aw">${A.bad.map(a=>aw(a,'bd')).join('')}</div>`:''}
+
+    <h3>📝 Nhanh</h3><div class="rp-c rp-notes">${notes.map(n=>`<span>• ${n}</span>`).join('')}</div>
+
+    ${(()=>{ const hof=months.slice().reverse().map(m=>{ const p=monthPlay(m).list.filter((x,_,a)=>x.p>=Math.max(3,Math.round(a.reduce((t,y)=>t+y.p,0)/(a.length||1)*.5)))[0]; return p?[m,p.name]:null; }).filter(Boolean);
+      return hof.length>1?`<h3>🏛 MVP các tháng</h3><div class="rp-c rp-notes">${hof.reverse().map(([m,n])=>`<span>👑 ${monthLabel(m)} · <b>${esc(n)}</b></span>`).join('')}</div>`:''; })()}
+
+    <details class="rp-rule"><summary>Cách tính & điều kiện</summary>
+      <span>Điểm = thắng×3 + buổi có mặt×6 (như BXH). Bằng điểm: nhiều trận thắng hơn → hiệu số.</span>
+      <span>MVP và các giải tỷ lệ cần tối thiểu <b>${P.minG} trận</b> trong tháng. Trận giao lưu không tính.</span>
+      <span>Tiền chỉ tính các buổi trong tháng. Quỹ tháng đóng trước cho tháng sau tính riêng.</span>
+      <span>Tiến bộ/Tụt dốc: điểm trình (Elo) đầu tháng so với cuối tháng.</span></details>
+    <button class="btn filled" data-act="rpCopy"><span class="ms">content_copy</span>Sao chép gửi Zalo</button>
+  </div>`);
+  openReport.text=()=>[`📊 ${S.boot.settings.clubName} – Báo cáo tháng ${monthLabel(mon)}${done?'':' (tạm tính)'}`,`${P.nS} buổi · ${P.ms.length} trận · ${nP} người`,
+    mvp?`👑 MVP: ${mvp.name} (${mvp.w}T-${mvp.l}B, ${Math.round(mvp.rate*100)}%)`:'',
+    `💰 Phải thu ${rpK(M.owe)} · đã thu ${pct}% · chi sân/nước ${rpK(M.chi)} · cộng vào quỹ ${M.net<0?'−':'+'}${rpK(Math.abs(M.net))}`,
+    '🏅 '+L.slice(0,5).map((x,k)=>`${k+1}.${x.name} ${x.pts}đ`).join(' · '),
+    ...A.good.map(a=>`${a[0]} ${a[1]}: ${a[2]} – ${a[3]}`),...A.bad.map(a=>`${a[0]} ${a[1]}: ${a[2]} – ${a[3]}`)].filter(Boolean).join('\n');
 }
 
 /* ====================== ĐỐI ĐẦU (head-to-head) ====================== */
@@ -2043,21 +2217,23 @@ function openScore(id){
     <div class="sh-head"><div><h2>Trận #${m.no}</h2><div class="sub">${roundTime(s,m)} · ${m.stage?STAGE_NAME[m.stage]:'Vòng '+m.round}${s.courts>1||s.courtNames?.length?` · <span class="cbadge ${s.courts>1?cc(m.court):''}">${esc(courtName(s,m.court))}</span>`:''} ${mBadges(m,s,1)}</div></div>
       <button class="icon-btn" data-act="closeSheet" aria-label="Đóng"><span class="ms">close</span></button></div>
     <div class="qs-by ${pre?'':'need'}"><span>Người ghi</span><select class="inp" id="by"><option value="">— Chọn tên bạn —</option>${people.map(p=>`<option ${p===pre?'selected':''}>${esc(p)}</option>`).join('')}</select></div>
-    <div class="qs">
-      <div class="qs-h">① Đội nào thắng?</div>
-      <div class="qs-win"><button class="qs-t" data-act="qsWin" data-w="A"><small>ĐỘI A</small><b>${esc(tn(m.a))}</b></button><button class="qs-t" data-act="qsWin" data-w="B"><small>ĐỘI B</small><b>${esc(tn(m.b))}</b></button></div>
-      <div id="qsLose" hidden><div class="qs-h">② Tỷ số – <small>chạm là lưu luôn</small></div>
-        <div class="qs-grid">${Array.from({length:T-1},(_,i)=>`<button data-act="qsLose" data-l="${i}">${T}–${i}</button>`).join('')}${[T-1,T,T+1].map(l=>`<button data-act="qsLose" data-l="${l}" class="deuce">${l+2}–${l}</button>`).join('')}</div></div>
-    </div>
-    <details class="qs-manual" ${m.win?'open':''}><summary>${m.win?`Đang có tỷ số <b>${m.sa}–${m.sb}</b> · sửa tay`:'Nhập tay từng điểm'}</summary>
+    <div class="qs-manual">
     <div class="sc-row" id="rowA"><div class="sc-team"><small>ĐỘI A</small>${esc(tn(m.a))}</div>
-      <div class="stepper"><button type="button" data-act="step" data-t="sa" data-d="-1" aria-label="Giảm">−</button><input id="sa" inputmode="numeric" pattern="[0-9]*" value="${m.sa??''}" aria-label="Điểm đội A"><button type="button" data-act="step" data-t="sa" data-d="1" aria-label="Tăng">+</button></div>
+      <div class="stepper"><button type="button" data-act="step" data-t="sa" data-d="-1" aria-label="Giảm">−</button><input id="sa" inputmode="numeric" pattern="[0-9]*" enterkeyhint="next" autocomplete="off" value="${m.sa??''}" aria-label="Điểm đội A"><button type="button" data-act="step" data-t="sa" data-d="1" aria-label="Tăng">+</button></div>
       <button class="eleven" data-act="eleven" data-t="sa">Đội A thắng ${T}</button></div>
     <div class="sc-row" id="rowB"><div class="sc-team"><small>ĐỘI B</small>${esc(tn(m.b))}</div>
-      <div class="stepper"><button type="button" data-act="step" data-t="sb" data-d="-1" aria-label="Giảm">−</button><input id="sb" inputmode="numeric" pattern="[0-9]*" value="${m.sb??''}" aria-label="Điểm đội B"><button type="button" data-act="step" data-t="sb" data-d="1" aria-label="Tăng">+</button></div>
+      <div class="stepper"><button type="button" data-act="step" data-t="sb" data-d="-1" aria-label="Giảm">−</button><input id="sb" inputmode="numeric" pattern="[0-9]*" enterkeyhint="done" autocomplete="off" value="${m.sb??''}" aria-label="Điểm đội B"><button type="button" data-act="step" data-t="sb" data-d="1" aria-label="Tăng">+</button></div>
       <button class="eleven" data-act="eleven" data-t="sb">Đội B thắng ${T}</button></div>
     <div class="hint" id="scHint">Nhập điểm hai đội, ví dụ 11–9.</div>
     <div class="actions">${m.win?`<button class="btn outline big" data-act="clearScore" data-id="${m.id}" style="flex:0 0 auto">Xóa</button>`:''}<button class="btn filled big" id="saveScore">Lưu tỷ số</button></div>
+    </div>
+    <details class="qs-quick"><summary>Chọn nhanh: đội thắng + tỷ số</summary>
+    <div class="qs">
+      <div class="qs-h">Đội nào thắng?</div>
+      <div class="qs-win"><button class="qs-t" data-act="qsWin" data-w="A"><small>ĐỘI A</small><b>${esc(tn(m.a))}</b></button><button class="qs-t" data-act="qsWin" data-w="B"><small>ĐỘI B</small><b>${esc(tn(m.b))}</b></button></div>
+      <div id="qsLose" hidden><div class="qs-h">Tỷ số – <small>chạm là lưu luôn</small></div>
+        <div class="qs-grid">${Array.from({length:T-1},(_,i)=>`<button data-act="qsLose" data-l="${i}">${T}–${i}</button>`).join('')}${[T-1,T,T+1].map(l=>`<button data-act="qsLose" data-l="${l}" class="deuce">${l+2}–${l}</button>`).join('')}</div></div>
+    </div>
     </details>
     ${m.by?`<div class="sub"><span class="ms" style="font-size:16px;vertical-align:-3px">history</span> Lần cuối: <b>${esc(m.by)}</b> lúc ${atLabel(m.at)}</div>`:''}
     ${m.stage?'':`<button class="btn text sm" data-act="editMatch" data-id="${m.id}"><span class="ms">manage_accounts</span>Sửa người / thể loại trận này (quản lý)</button>`}`);
@@ -2073,6 +2249,9 @@ function openScore(id){
     h.innerHTML=`<b>${esc(tn(W))}</b> thắng. ${f?`${esc(tn(L))} đóng ${kmoney(f)}/người${nl>1?` (tổng ${kmoney(f*nl)})`:''}.`:m.mode==='GL'?'Trận giao lưu: chỉ lưu đối đầu, không tính tiền & BXH.':'Đánh vui, không tính tiền.'}${warn}`;
   };
   $('#sa').oninput=upd; $('#sb').oninput=upd; upd();
+  $('#sa').onkeydown=e=>{ if(e.key==='Enter'){ e.preventDefault(); $('#sb').focus(); } };
+  $('#sb').onkeydown=e=>{ if(e.key==='Enter'){ e.preventDefault(); $('#saveScore').click(); } };
+  if(!m.win){ try{ $('#sa').focus({preventScroll:true}); }catch(e){} } // mở là gõ điểm luôn
   $('#by').onchange=e=>{ const v=e.target.value; if(v){ S.me=v; store.set('sopick_me',v); e.target.parentNode.classList.remove('need'); } };
   openScore.upd=upd;
   /** Lưu: hiện ngay trên máy, gửi server phía sau; mạng yếu thì giữ trên máy và tự gửi lại. */
@@ -2232,6 +2411,10 @@ function openMatchForm(id,preset){
 }
 const MatchActs={
   h2hPair(t){ const go=()=>openH2HPair(t.dataset.a,t.dataset.b,t.dataset.rel); if(S.allMatches) go(); else ensureAll().then(go).catch(fail); },
+  rpOpen(t){ S.rpAll=false; openReport(t.dataset.m); },
+  rpMon(t){ S.rpAll=false; openReport(t.dataset.m); },
+  rpAll(){ S.rpAll=!S.rpAll; const y=$('#sheetBody').scrollTop; openReport(S.rpMon); $('#sheetBody').scrollTop=y; },
+  rpCopy(){ copyText(openReport.text()); },
   pmSub(t){ openPlayerMs(t.dataset.name,t.dataset.mode,t.dataset.sub); },
   pmView(t){ const go=()=>openPlayerMs(t.dataset.name,t.dataset.mode); if(S.allMatches) go(); else ensureAll().then(go).catch(fail); },
   qsWin(t){ openScore.W=t.dataset.w; document.querySelectorAll('.qs-t').forEach(b=>b.classList.toggle('on',b===t)); const l=$('#qsLose'); l.hidden=false; setTimeout(()=>l.scrollIntoView({behavior:'smooth',block:'nearest'}),30); },
