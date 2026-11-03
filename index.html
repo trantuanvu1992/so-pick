@@ -246,6 +246,7 @@ tbody tr{border-top:1px solid var(--hair)}
 .sc2-in{width:62px;height:54px;border-radius:14px;border:2px solid color-mix(in srgb,var(--fg) 18%,transparent);background:var(--glass-hi);text-align:center;font-size:28px;font-weight:800;padding:0;color:var(--fg)}
 .sc2-in:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 3px color-mix(in srgb,var(--primary) 20%,transparent)}
 .sc2-dash{text-align:center;font-weight:800;color:var(--muted)}
+.sc2-by{padding:4px 10px}.sc2-by .inp{height:36px}
 .sc2-act{display:flex;gap:8px}.sc2-act .btn{height:48px}.sc2-act .btn.filled{flex:1;font-size:16px}
 .sc-row{display:grid;grid-template-columns:1fr auto;gap:10px;align-items:center;padding:12px;border-radius:18px;background:color-mix(in srgb,var(--bg) 60%,transparent)}
 .sc-row.win{background:var(--win-c)}
@@ -669,8 +670,8 @@ setTimeout(function(){if(!window.__SOPICK_END__){var v=document.getElementById('
 /* ====== CẤU HÌNH BẢN MOBILE ======
  * Dán link web app Apps Script (…/exec) vào giữa 2 dấu nháy dưới đây.
  * (Hoặc mở 1 lần: https://<tên>.github.io/<repo>/?api=<link …/exec> – app tự nhớ link trên máy đó.) */
-window.SOPICK_API = 'https://script.google.com/macros/s/AKfycbz5zsQ9bcgZ2uEDA2gzv9pcy2iKlMncVFMEFVhg0-Wn-5CO4sb3EPNxmdOiPwAscQ-G/exec';
-window.SOPICK_BUILD = '03/11/2026 10:56';
+window.SOPICK_API = 'https://script.google.com/macros/s/AKfycbwADPV7P0z5tdS3jotiILErF3HKfY1NQrREnBI9sKxDpyDWP0kqo1D0kILbKMumAFvt/exec';
+window.SOPICK_BUILD = '03/11/2026 11:04';
 (function(){ var FILE=window.SOPICK_API; window.SOPICK_FILE_API=FILE;
   try{ var q=new URLSearchParams(location.search).get('api');
     if(q&&/^https:\/\/script\.google\.com\/.+\/exec$/.test(q)){ localStorage.setItem('sopick_api',q); localStorage.setItem('sopick_api_base',FILE); history.replaceState(null,'',location.pathname); }
@@ -2229,6 +2230,7 @@ function openScore(id){
   openSheet(`
     <div class="sc2-head"><b>Trận #${m.no}</b><span>${roundTime(s,m)}${s.courts>1||s.courtNames?.length?` · <i class="cbadge ${s.courts>1?cc(m.court):''}">${esc(courtName(s,m.court))}</i>`:''} ${mBadges(m,s,1)}</span>
       <button class="icon-btn" data-act="closeSheet" aria-label="Đóng"><span class="ms">close</span></button></div>
+    <div class="qs-by sc2-by ${pre?'':'need'}"><span>Người ghi</span><select class="inp" id="by"><option value="">— Chọn tên bạn —</option>${people.map(p=>`<option ${p===pre?'selected':''}>${esc(p)}</option>`).join('')}</select></div>
     <div class="sc2">
       <div class="sc2-t a" id="rowA">${nm2('a')}</div>
       <input id="sa" class="sc2-in" inputmode="numeric" pattern="[0-9]*" enterkeyhint="next" autocomplete="off" value="${m.sa??''}" placeholder="–" aria-label="Điểm ${esc(tn(m.a))}">
@@ -2238,7 +2240,6 @@ function openScore(id){
     </div>
     <div class="sc2-act">${m.win?`<button class="btn outline" data-act="clearScore" data-id="${m.id}">Xóa</button>`:''}<button class="btn filled" id="saveScore"><span class="ms">check</span>Lưu tỷ số</button></div>
     <div class="hint" id="scHint">Nhập điểm hai đội, ví dụ 11–9.</div>
-    <div class="qs-by ${pre?'':'need'}"><span>Người ghi</span><select class="inp" id="by"><option value="">— Chọn tên bạn —</option>${people.map(p=>`<option ${p===pre?'selected':''}>${esc(p)}</option>`).join('')}</select></div>
     <details class="qs-quick"><summary>Chọn nhanh: đội thắng + tỷ số</summary>
     <div class="qs">
       <div class="qs-h">Đội nào thắng?</div>
