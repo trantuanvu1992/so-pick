@@ -618,8 +618,8 @@ setTimeout(function(){if(!window.__SOPICK_END__){var v=document.getElementById('
 /* ====== CẤU HÌNH BẢN MOBILE ======
  * Dán link web app Apps Script (…/exec) vào giữa 2 dấu nháy dưới đây.
  * (Hoặc mở 1 lần: https://<tên>.github.io/<repo>/?api=<link …/exec> – app tự nhớ link trên máy đó.) */
-window.SOPICK_API = 'https://script.google.com/macros/s/AKfycbza5np1kft0XAMJAIpAyulBiS9wgHg_YpbF8cbUljQc-jBrqUAZgjkPYPVHdxKsCYeM/exec';
-window.SOPICK_BUILD = '03/11/2026 08:28';
+window.SOPICK_API = 'https://script.google.com/macros/s/AKfycbwADPV7P0z5tdS3jotiILErF3HKfY1NQrREnBI9sKxDpyDWP0kqo1D0kILbKMumAFvt/exec';
+window.SOPICK_BUILD = '03/11/2026 09:18';
 (function(){ var FILE=window.SOPICK_API; window.SOPICK_FILE_API=FILE;
   try{ var q=new URLSearchParams(location.search).get('api');
     if(q&&/^https:\/\/script\.google\.com\/.+\/exec$/.test(q)){ localStorage.setItem('sopick_api',q); localStorage.setItem('sopick_api_base',FILE); history.replaceState(null,'',location.pathname); }
@@ -1357,6 +1357,7 @@ const carryTxt=c=>Object.entries(c||{}).sort((a,b)=>b[1]-a[1]).map(([p,v])=>`${e
 
 /* ====================== RENDER ====================== */
 function render(){
+  if(S.matches) S.matches.forEach(normM);
   if(S.matches&&S.matches.length) applyOutbox();
   if(S.session&&S.boot){ const x=S.boot.sessions.find(z=>z.id===S.session.id); if(x){ x.matchCount=S.matches.length; x.doneCount=S.matches.filter(m=>m.win).length; } }
   $('#clubName').textContent=S.boot?.settings?.clubName||'Sổ Pick';
@@ -3651,7 +3652,9 @@ document.addEventListener('keydown',e=>{ if(e.key==='Escape'&&sheetOpen()) close
 
 /* ====================== TẢI DỮ LIỆU ====================== */
 function refreshBoot(){ return call('api_bootstrap').then(b=>{S.boot=b;render();}); }
-const sortM=ms=>ms.sort((a,b)=>(a.round-b.round)||(a.court-b.court)||(a.no-b.no));
+/** Chuẩn hoá trận từ máy chủ: máy chủ bản cũ trả vong_dau='DT' thay vì cờ dự trù → vẫn hiểu là trận dự trù. */
+const normM=m=>{ if(m&&m.stage==='DT'){ m.stage=''; m.reserve=true; } return m; };
+const sortM=ms=>(ms.forEach(normM),ms).sort((a,b)=>(a.round-b.round)||(a.court-b.court)||(a.no-b.no));
 function loadSession(id){
   return call('api_getMatches',id).then(r=>{S.sid=id;store.set('sopick_sid',id);S.session=r.session;S.matches=sortM(r.matches);if(sheetOpen())closeSheet();render();cupAutoFill();});
 }
