@@ -239,6 +239,14 @@ tbody tr{border-top:1px solid var(--hair)}
 .actions{display:flex;gap:10px;position:sticky;bottom:0}
 
 /* score entry */
+.sc2-head{display:flex;align-items:center;gap:8px;margin:-4px 0 2px}.sc2-head b{font-size:17px}.sc2-head>span{flex:1;font-size:12.5px;color:var(--muted);display:flex;align-items:center;gap:4px;flex-wrap:wrap}.sc2-head .cbadge{font-style:normal;height:20px;font-size:11px}
+.sc2{display:grid;grid-template-columns:minmax(0,1fr) 62px 12px 62px minmax(0,1fr);align-items:center;gap:6px;padding:8px 6px;border-radius:16px;background:color-mix(in srgb,var(--bg) 60%,transparent)}
+.sc2-t{display:flex;flex-direction:column;gap:1px;font-weight:800;font-size:14px;line-height:1.2;min-width:0;padding:4px 6px;border-radius:10px}.sc2-t span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.sc2-t.a{text-align:right;align-items:flex-end}.sc2-t.win{background:var(--win-c);color:var(--win)}
+.sc2-in{width:62px;height:54px;border-radius:14px;border:2px solid color-mix(in srgb,var(--fg) 18%,transparent);background:var(--glass-hi);text-align:center;font-size:28px;font-weight:800;padding:0;color:var(--fg)}
+.sc2-in:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 3px color-mix(in srgb,var(--primary) 20%,transparent)}
+.sc2-dash{text-align:center;font-weight:800;color:var(--muted)}
+.sc2-act{display:flex;gap:8px}.sc2-act .btn{height:48px}.sc2-act .btn.filled{flex:1;font-size:16px}
 .sc-row{display:grid;grid-template-columns:1fr auto;gap:10px;align-items:center;padding:12px;border-radius:18px;background:color-mix(in srgb,var(--bg) 60%,transparent)}
 .sc-row.win{background:var(--win-c)}
 .sc-team{font-weight:800;font-size:17px;line-height:1.25;min-width:0}
@@ -661,8 +669,8 @@ setTimeout(function(){if(!window.__SOPICK_END__){var v=document.getElementById('
 /* ====== CẤU HÌNH BẢN MOBILE ======
  * Dán link web app Apps Script (…/exec) vào giữa 2 dấu nháy dưới đây.
  * (Hoặc mở 1 lần: https://<tên>.github.io/<repo>/?api=<link …/exec> – app tự nhớ link trên máy đó.) */
-window.SOPICK_API = 'https://script.google.com/macros/s/AKfycbwL84b69v-xDZiuRn0DUtYi2ab7Eofg_H1BmQAY-E4GD2JxKPEmJq6kMZ4geUdI_MPU/exec';
-window.SOPICK_BUILD = '03/11/2026 10:43';
+window.SOPICK_API = 'https://script.google.com/macros/s/AKfycbwADPV7P0z5tdS3jotiILErF3HKfY1NQrREnBI9sKxDpyDWP0kqo1D0kILbKMumAFvt/exec';
+window.SOPICK_BUILD = '03/11/2026 10:56';
 (function(){ var FILE=window.SOPICK_API; window.SOPICK_FILE_API=FILE;
   try{ var q=new URLSearchParams(location.search).get('api');
     if(q&&/^https:\/\/script\.google\.com\/.+\/exec$/.test(q)){ localStorage.setItem('sopick_api',q); localStorage.setItem('sopick_api_base',FILE); history.replaceState(null,'',location.pathname); }
@@ -2186,6 +2194,10 @@ function shareRank(){
 /* ====================== SHEETS (bottom sheet) ====================== */
 let sheetClose=null;
 function openSheet(html,onClose){ $('#sheetBody').innerHTML=html; $('#sheet').classList.add('on'); $('#scrim').classList.add('on'); sheetClose=onClose||null; $('#sheetBody').scrollTop=0; }
+/* iOS/Android: khi bàn phím ảo bật lên thì đẩy bảng (sheet) lên trên bàn phím để thấy ô nhập + nút Lưu */
+if(window.visualViewport){ const vv=window.visualViewport, fitKb=()=>{ const sh=document.getElementById('sheet'); if(!sh) return;
+  const kb=Math.max(0,Math.round(window.innerHeight-vv.height-vv.offsetTop)); sh.style.bottom=kb>60?kb+'px':''; sh.style.maxHeight=kb>60?(vv.height-6)+'px':''; };
+  vv.addEventListener('resize',fitKb); vv.addEventListener('scroll',fitKb); }
 function closeSheet(){ $('#sheet').classList.remove('on'); $('#scrim').classList.remove('on'); const f=sheetClose; sheetClose=null; f&&f(); }
 const sheetOpen=()=>$('#sheet').classList.contains('on');
 
@@ -2213,20 +2225,20 @@ function openScore(id){
   const people=[...new Set([...s.players,...S.boot.members.filter(x=>x.active).map(x=>x.name)])];
   const pre=S.me||[...m.a,...m.b].find(p=>fold(p)===fold(S.q))||'';
   const T=TG();
+  const nm2=T=>sideNames(m,T).filter(Boolean).map(n=>`<span>${esc(n)}</span>`).join('');
   openSheet(`
-    <div class="sh-head"><div><h2>Trận #${m.no}</h2><div class="sub">${roundTime(s,m)} · ${m.stage?STAGE_NAME[m.stage]:'Vòng '+m.round}${s.courts>1||s.courtNames?.length?` · <span class="cbadge ${s.courts>1?cc(m.court):''}">${esc(courtName(s,m.court))}</span>`:''} ${mBadges(m,s,1)}</div></div>
+    <div class="sc2-head"><b>Trận #${m.no}</b><span>${roundTime(s,m)}${s.courts>1||s.courtNames?.length?` · <i class="cbadge ${s.courts>1?cc(m.court):''}">${esc(courtName(s,m.court))}</i>`:''} ${mBadges(m,s,1)}</span>
       <button class="icon-btn" data-act="closeSheet" aria-label="Đóng"><span class="ms">close</span></button></div>
-    <div class="qs-by ${pre?'':'need'}"><span>Người ghi</span><select class="inp" id="by"><option value="">— Chọn tên bạn —</option>${people.map(p=>`<option ${p===pre?'selected':''}>${esc(p)}</option>`).join('')}</select></div>
-    <div class="qs-manual">
-    <div class="sc-row" id="rowA"><div class="sc-team"><small>ĐỘI A</small>${esc(tn(m.a))}</div>
-      <div class="stepper"><button type="button" data-act="step" data-t="sa" data-d="-1" aria-label="Giảm">−</button><input id="sa" inputmode="numeric" pattern="[0-9]*" enterkeyhint="next" autocomplete="off" value="${m.sa??''}" aria-label="Điểm đội A"><button type="button" data-act="step" data-t="sa" data-d="1" aria-label="Tăng">+</button></div>
-      <button class="eleven" data-act="eleven" data-t="sa">Đội A thắng ${T}</button></div>
-    <div class="sc-row" id="rowB"><div class="sc-team"><small>ĐỘI B</small>${esc(tn(m.b))}</div>
-      <div class="stepper"><button type="button" data-act="step" data-t="sb" data-d="-1" aria-label="Giảm">−</button><input id="sb" inputmode="numeric" pattern="[0-9]*" enterkeyhint="done" autocomplete="off" value="${m.sb??''}" aria-label="Điểm đội B"><button type="button" data-act="step" data-t="sb" data-d="1" aria-label="Tăng">+</button></div>
-      <button class="eleven" data-act="eleven" data-t="sb">Đội B thắng ${T}</button></div>
-    <div class="hint" id="scHint">Nhập điểm hai đội, ví dụ 11–9.</div>
-    <div class="actions">${m.win?`<button class="btn outline big" data-act="clearScore" data-id="${m.id}" style="flex:0 0 auto">Xóa</button>`:''}<button class="btn filled big" id="saveScore">Lưu tỷ số</button></div>
+    <div class="sc2">
+      <div class="sc2-t a" id="rowA">${nm2('a')}</div>
+      <input id="sa" class="sc2-in" inputmode="numeric" pattern="[0-9]*" enterkeyhint="next" autocomplete="off" value="${m.sa??''}" placeholder="–" aria-label="Điểm ${esc(tn(m.a))}">
+      <span class="sc2-dash">–</span>
+      <input id="sb" class="sc2-in" inputmode="numeric" pattern="[0-9]*" enterkeyhint="done" autocomplete="off" value="${m.sb??''}" placeholder="–" aria-label="Điểm ${esc(tn(m.b))}">
+      <div class="sc2-t b" id="rowB">${nm2('b')}</div>
     </div>
+    <div class="sc2-act">${m.win?`<button class="btn outline" data-act="clearScore" data-id="${m.id}">Xóa</button>`:''}<button class="btn filled" id="saveScore"><span class="ms">check</span>Lưu tỷ số</button></div>
+    <div class="hint" id="scHint">Nhập điểm hai đội, ví dụ 11–9.</div>
+    <div class="qs-by ${pre?'':'need'}"><span>Người ghi</span><select class="inp" id="by"><option value="">— Chọn tên bạn —</option>${people.map(p=>`<option ${p===pre?'selected':''}>${esc(p)}</option>`).join('')}</select></div>
     <details class="qs-quick"><summary>Chọn nhanh: đội thắng + tỷ số</summary>
     <div class="qs">
       <div class="qs-h">Đội nào thắng?</div>
