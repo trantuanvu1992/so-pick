@@ -437,7 +437,13 @@ button.prow{width:100%;text-align:left;font:inherit;color:inherit}
 .c-owner{background:linear-gradient(135deg,#FFEFD0,#FFF8EA)}.c-owner b{color:#8A4B00}
 .c-debt{background:linear-gradient(135deg,#FCE4EC,#FFF5F8)}.c-debt b{color:#A3264A}
 .c-after{background:linear-gradient(135deg,#E0EEFF,#F4F9FF)}.c-after b{color:#1B4F94}
+.c-pie{background:linear-gradient(135deg,#EEF3FF,#F8FAFF)}
+.fcard small em{font-style:normal;font-weight:600;opacity:.8}
+.pie{display:flex;align-items:center;gap:8px;width:100%;margin-top:2px;min-width:0}.pie svg{flex:0 0 auto}
+.pie-l{display:flex;flex-direction:column;gap:3px;min-width:0;flex:1;font-size:11px;color:#4F5B5D}.pie-l span{display:flex;align-items:center;gap:5px;white-space:nowrap}
+.pie-l i{width:9px;height:9px;border-radius:3px;flex:0 0 auto}.pie-l b{font-size:12px;color:#1F2B2C;margin-left:auto;padding-left:4px}
 .fbar{display:block;width:100%;height:5px;border-radius:9px;background:rgba(0,0,0,.08);margin-top:4px;overflow:hidden}.fbar i{display:block;height:100%;background:#A3264A;border-radius:9px}
+.st-row.dep{opacity:.75}.st-row.dep b{color:var(--muted)}
 .od-row.tot{border-top:2px solid var(--hair);border-bottom:0;font-weight:800;padding-top:8px;margin-top:2px}
 .fcard small,.fcard>span{color:#4F5B5D}
 .sttag{display:inline-flex;align-items:center;gap:2px;font-size:10.5px;font-weight:800;padding:1px 7px;border-radius:7px;letter-spacing:0;text-transform:none;vertical-align:1px}
@@ -618,8 +624,8 @@ setTimeout(function(){if(!window.__SOPICK_END__){var v=document.getElementById('
 /* ====== CẤU HÌNH BẢN MOBILE ======
  * Dán link web app Apps Script (…/exec) vào giữa 2 dấu nháy dưới đây.
  * (Hoặc mở 1 lần: https://<tên>.github.io/<repo>/?api=<link …/exec> – app tự nhớ link trên máy đó.) */
-window.SOPICK_API = 'https://script.google.com/macros/s/AKfycbywB-V02JRrA0jEJCmP4UKK1ezYI46D21hw6J-oJZdDqwzLkd38CE3CMxEGzWvw_8Vi/exec';
-window.SOPICK_BUILD = '03/11/2026 09:18';
+window.SOPICK_API = 'https://script.google.com/macros/s/AKfycbwADPV7P0z5tdS3jotiILErF3HKfY1NQrREnBI9sKxDpyDWP0kqo1D0kILbKMumAFvt/exec';
+window.SOPICK_BUILD = '03/11/2026 09:56';
 (function(){ var FILE=window.SOPICK_API; window.SOPICK_FILE_API=FILE;
   try{ var q=new URLSearchParams(location.search).get('api');
     if(q&&/^https:\/\/script\.google\.com\/.+\/exec$/.test(q)){ localStorage.setItem('sopick_api',q); localStorage.setItem('sopick_api_base',FILE); history.replaceState(null,'',location.pathname); }
@@ -1204,7 +1210,7 @@ function fundSplit(L){
   const parts={fines:sum(l=>l.type==='THU'&&l.category==='Tiền thua'&&done(l)),monthly:sum(l=>l.type==='THU'&&l.category==='Quỹ tháng'&&done(l)),surplus,fundPay};
   parts.other=F-(parts.fines+parts.monthly+surplus-fundPay);
   // quỹ hội âm = quỹ chưa đủ tiền trả sân → phần âm đó cũng là chủ hội đang ứng thay quỹ
-  return {N:f.balance,O,Oexp,F,Fexp,dep,parts,srcs,pend:f.pend,OT:O+Math.max(0,-F),OTexp:Oexp+Math.max(0,-Fexp)};
+  return {N:f.balance,O,Oexp,F,Fexp,dep,parts,srcs,surplusExp,pend:f.pend,OT:O+Math.max(0,-F),OTexp:Oexp+Math.max(0,-Fexp)};
 }
 /** Tiền thua/người của 1 trận: giao lưu = 0; trận có mức riêng thì theo trận; còn lại theo buổi. */
 const matchFee=(s,m)=>m.mode==='GL'?0:(m.fee!=null&&m.fee!==''?+m.fee:(+s.fee||0));
@@ -2926,15 +2932,21 @@ function viewFund(){
   <section class="fsum">
     <div class="fsum-top"><span class="eyebrow">Quỹ${st.startDate?` · sổ từ ${shortDate(st.startDate)}/${st.startDate.slice(0,4)}`:''}</span>
       <div class="row-actions"><button class="btn tonal sm" data-act="openCount"><span class="ms">calculate</span>Kiểm kê</button><button class="btn outline sm" data-act="fab"><span class="ms">add</span>Thu / Chi</button><button class="btn outline sm" data-act="openMonthly"><span class="ms">calendar_month</span>Quỹ tháng</button></div></div>
-    <div class="fcards">
-      <button class="fcard ${FS.F<0?'c-neg':'c-fund'}" data-act="fDet" data-k="fund"><small>Quỹ hội</small><b>${FS.F<0?'−':''}${money(Math.abs(FS.F))}</b>
-        <span>${FS.F<0?'Chưa đủ trả sân tháng':'Tiền thua · quỹ tháng · dư'}</span></button>
-      <button class="fcard c-owner" data-act="fDet" data-k="owner"><small>${esc(ownerName())} đang ứng</small><b>${money(FS.OT)}</b>
-        <span>${FS.OT?`Sân/nước ${kmoney(FS.O)}${FS.F<0?` + thay quỹ ${kmoney(-FS.F)}`:''}`:'Không ứng gì'}</span></button>
+    ${(()=>{ const fin=L.filter(l=>l.type==='THU'&&l.category==='Tiền thua').reduce((t,l)=>t+l.amount,0), rnd=Math.round(FS.surplusExp||0), du=FS.Fexp-fin-rnd;
+      const parts=[['Tiền thua',fin,'#2F8F78'],['Quỹ dư',du,'#E0A43A'],['Làm tròn dư',rnd,'#6C8EEF']], pos=parts.filter(x=>x[1]>0), tot=pos.reduce((t,x)=>t+x[1],0)||1;
+      let off=0; const C=2*Math.PI*15.9;
+      const ring=pos.map(([n,v,c])=>{ const len=v/tot*C, seg=`<circle r="15.9" cx="21" cy="21" fill="none" stroke="${c}" stroke-width="6" stroke-dasharray="${len.toFixed(2)} ${(C-len).toFixed(2)}" stroke-dashoffset="${(-off).toFixed(2)}" transform="rotate(-90 21 21)"/>`; off+=len; return seg; }).join('');
+      return `<div class="fcards">
+      <button class="fcard ${FS.Fexp<0?'c-neg':'c-fund'}" data-act="fDet" data-k="after"><small>Quỹ hội <em>(khi thu đủ)</em></small><b>${FS.Fexp<0?'−':''}${money(Math.abs(FS.Fexp))}</b>
+        <span>Tiền thua ${kmoney(fin)} · Quỹ dư ${du<0?'−':''}${kmoney(Math.abs(du))} · Làm tròn ${kmoney(rnd)}</span><span>Đang có trong quỹ: ${FS.F<0?'−':''}${kmoney(Math.abs(FS.F))}</span></button>
+      <button class="fcard c-pie" data-act="fDet" data-k="fund"><small>Quỹ đến từ đâu</small>
+        <div class="pie"><svg viewBox="0 0 42 42" width="54" height="54" aria-hidden="true"><circle r="15.9" cx="21" cy="21" fill="none" stroke="rgba(0,0,0,.07)" stroke-width="6"/>${ring}</svg>
+        <div class="pie-l">${parts.map(([n,v,c])=>`<span><i style="background:${c}"></i>${n} <b>${v>0?Math.round(v*100/tot)+'%':'–'}</b></span>`).join('')}</div></div></button>
       <button class="fcard c-debt" data-act="fDet" data-k="debt"><small>Mọi người còn nợ</small><b>${money(FS.pend)}</b>
         <span>${D.length} người · đã thu ${ratio}%</span><i class="fbar"><i style="width:${ratio}%"></i></i></button>
-      <button class="fcard c-after" data-act="fDet" data-k="after"><small>Khi thu đủ</small><b>${FS.Fexp<0?'−':''}${money(Math.abs(FS.Fexp))}</b>
-        <span>${FS.OTexp?`${esc(ownerName())} còn ứng ${kmoney(FS.OTexp)}`:`${esc(ownerName())} hết ứng`}</span></button>
+      <button class="fcard c-owner" data-act="fDet" data-k="owner"><small>${esc(ownerName())} đang ứng</small><b>${money(FS.OT)}</b>
+        <span>${FS.OTexp?`Thu đủ còn ứng ${kmoney(FS.OTexp)}`:FS.OT?`Thu đủ là ${esc(ownerName())} hết ứng`:'Không ứng gì'}</span></button>
+    </div>`; })()}
     </div>
     ${FS.dep?`<div class="sub" style="padding:2px 6px">💳 Đang giữ hộ tiền gửi trước ${money(FS.dep)} (không tính vào quỹ)</div>`:''}
   </section>
@@ -2986,7 +2998,7 @@ function viewLedger(L){
   const inMon=w=>!mon||String(w).slice(0,7)===mon;
   let rows=[];
   if(who){ // lịch sử 1 người: mọi khoản (phải đóng, đã đóng lúc nào, trừ tiền gửi, gửi trước, tiền ứng)
-    rows=L.filter(l=>l.person===who&&!(l.category==='Trừ tiền gửi')).map(l=>({l,when:l.status==='CHUA_DONG'||l.type==='CHI'?l.date:lgWhen(l)})).filter(x=>inMon(x.when)).sort((a,b)=>b.when.localeCompare(a.when));
+    rows=personLed(who,L).map(l=>({l,when:l.status==='CHUA_DONG'||l.type==='CHI'?l.date:lgWhen(l)})).filter(x=>inMon(x.when));
   } else if(mode==='due') rows=L.filter(l=>l.type==='THU'&&l.status==='CHUA_DONG'&&inMon(l.date)).sort((a,b)=>b.date.localeCompare(a.date)).map(l=>({l,when:l.date}));
   else rows=flowItems(L).filter(x=>(mode==='flow'||x.kind===mode)&&inMon(x.when));
   const tin=who?0:rows.filter(x=>x.kind==='in').reduce((t,x)=>t+x.amount,0), tout=who?0:rows.filter(x=>x.kind==='out').reduce((t,x)=>t+x.amount,0);
@@ -2997,9 +3009,9 @@ function viewLedger(L){
     const adv=L.filter(l=>l.type==='CHI'&&l.person===who).reduce((t,l)=>t+l.amount,0);
     return head+`${mon?`<div class="sub" style="padding:0 6px">Chỉ tính các khoản phát sinh / đóng trong tháng ${monthLabel(mon)}</div>`:''}<div class="stats"><div class="stat glass"><small>Phải đóng</small><b>${kmoney(owe)}</b></div><div class="stat glass"><small>Đã đóng</small><b class="pos">${kmoney(paid)}</b></div><div class="stat glass"><small>Còn nợ</small><b class="${owe-paid>0?'neg':'pos'}">${kmoney(owe-paid)}</b></div>${cr?`<div class="stat glass"><small>Tiền gửi còn</small><b class="pos">${kmoney(cr)}</b></div>`:''}${adv?`<div class="stat glass"><small>Đã ứng sân/nước</small><b>${kmoney(adv)}</b></div>`:''}</div>
       <div class="panel glass">${rows.slice(0,n).map(({l})=>{ const due=l.status==='CHUA_DONG', out=l.type==='CHI'||l.amount<0;
-        const st=l.type==='CHI'?`${esc(who)} ứng · ${shortDate(l.date)}`:due?'<span class="neg">chưa trả</span>':viaDep(l)?`trừ tiền gửi · ${atLabel(l.at)}`:`<span class="pos">đã đóng ${atLabel(l.at)}</span>${l.by?' · '+esc(l.by)+' ghi':''}`;
+        const st=ledStatus(l);
         return `<button class="lrow" data-act="ledger" data-id="${l.id}"><span class="licon ${l.type==='CHI'?'out':due?'wait':'in'}"><span class="ms">${l.type==='CHI'?'north_east':due?'schedule':'south_west'}</span></span>
-          <div class="pname">${esc(lgLabel(l))}<small>${st}</small></div><span class="lamt ${out?'neg':due?'':'pos'}">${out?'−':''}${kmoney(Math.abs(l.amount))}</span></button>`;}).join('')||'<div class="sub" style="padding:14px">Chưa có khoản nào</div>'}</div>
+          <div class="pname">${l.type==='CHI'?esc(lgLabel(l)):ledDesc(l)}<small>${st}</small></div><span class="lamt ${out?'neg':due?'':'pos'}">${out?'−':''}${kmoney(Math.abs(l.amount))}</span></button>`;}).join('')||'<div class="sub" style="padding:14px">Chưa có khoản nào</div>'}</div>
       ${rows.length>n?`<button class="btn text" data-act="lgMore">Xem thêm ${Math.min(40,rows.length-n)} dòng</button>`:''}
       <button class="btn tonal" data-act="stmt" data-name="${esc(who)}"><span class="ms">receipt_long</span>Sao kê ${esc(who)} (gửi cho bạn ấy)</button>`;
   }
@@ -3320,10 +3332,31 @@ function viewCup(){
 }
 
 /* ---------- sao kê công nợ từng người (ai cũng xem được) ---------- */
+/** Mô tả 1 khoản của 1 người (dùng chung cho Sổ thu chi lọc theo người và Sao kê). */
+function ledDesc(l){
+  if(isDep(l)) return l.category==='Gửi trước'?'💳 Gửi trước (tiền gửi, không phải nợ)':l.category==='Hoàn tiền gửi'?'💳 Hoàn tiền gửi':'💳 '+esc(l.category);
+  if(l.sessionId==='DK') return `Nợ đầu kỳ · ${esc(l.note||'nợ cũ')}`;
+  if(String(l.sessionId).startsWith('QT-')) return `Quỹ tháng ${monthLabel(l.sessionId.slice(3))}`;
+  const s=S.boot.sessions.find(x=>x.id===l.sessionId), tag=s&&isCup(s)?` (${esc(s.cup?.name||'giải')})`:'', diff=/chênh lệch/.test(l.note||'')?' · phần chênh lệch sau khi sửa buổi':'';
+  if(l.category==='Tiền thua') return `Buổi ${shortDate(l.date)}${tag} · tiền thua${s&&s.fee&&l.amount%s.fee===0&&l.amount>0?' ('+Math.round(l.amount/s.fee)+' × '+kmoney(s.fee)+')':''}${diff}`;
+  if(l.category==='Chia sân/nước') return `Buổi ${shortDate(l.date)}${tag} · sân/nước${diff}`;
+  return esc(l.category)+(l.note?' · '+esc(l.note):'');
+}
+function ledStatus(l){
+  if(l.type==='CHI') return `${esc(l.person)} ứng · ${shortDate(l.date)}`;
+  if(isDep(l)) return `${l.status==='CHUA_DONG'?'<span class="neg">chưa nhận</span>':`<span class="pos">đã nhận ${atLabel(l.at)}</span>`}${l.by?' · '+esc(l.by)+' ghi':''} · không tính vào phải đóng`;
+  if(l.status==='CHUA_DONG') return '<span class="neg">Chưa trả</span>';
+  return `<span class="pos">✓ ${viaDep(l)?'Trừ tiền gửi':'Đã trả'}</span> · ${atLabel(l.at)}${l.by&&!viaDep(l)?' · '+esc(l.by)+' ghi':''}`;
+}
+/** Các khoản của 1 người: mới phát sinh nhất ở trên. */
+function personLed(name,L){
+  const ord={'Quỹ tháng':0,'Chia sân/nước':1,'Tiền thua':2};
+  return L.filter(l=>l.person===name&&l.category!=='Trừ tiền gửi')
+    .sort((a,b)=>b.date.localeCompare(a.date)||String(b.at||'').localeCompare(String(a.at||''))||(ord[a.category]??9)-(ord[b.category]??9)); }
 function openStatement(name){
   const st=S.boot.settings.startDate, all=(S.boot.ledgerAll||S.boot.ledger).filter(l=>l.type==='THU'&&l.person===name);
   // bỏ khoản trước ngày mở sổ trừ nợ đầu kỳ (đã gom vào "Nợ đầu kỳ")
-  const off=new Set(S.boot.ledger.map(l=>l.id)), rows=all.filter(l=>off.has(l.id)&&!isDep(l)).sort((a,b)=>(a.date+noteKey(a.note)).localeCompare(b.date+noteKey(b.note)));
+  const off=new Set(S.boot.ledger.map(l=>l.id)), rowsAll=personLed(name,all.filter(l=>off.has(l.id))), rows=rowsAll.filter(l=>!isDep(l));
   const total=rows.reduce((t,l)=>t+l.amount,0), paid=rows.filter(l=>l.status==='DA_DONG').reduce((t,l)=>t+l.amount,0);
   const desc=l=>{
     if(l.sessionId==='DK') return `Nợ đầu kỳ · ${esc(l.note||'nợ cũ')}`;
@@ -3336,14 +3369,15 @@ function openStatement(name){
   let run=0;
   openSheet(`<div class="sh-head"><div style="display:flex;gap:12px;align-items:center">${avatar(name,44)}<div><h2>${esc(name)}</h2><div class="sub">Sao kê công nợ${st?` từ ${shortDate(st)}`:''} · app tự ghi, chủ hội quản lý</div></div></div><button class="icon-btn" data-act="closeSheet" aria-label="Đóng"><span class="ms">close</span></button></div>
     <div class="stats"><div class="stat glass"><small>Tổng phát sinh</small><b>${kmoney(total)}</b></div><div class="stat glass"><small>Đã trả</small><b class="pos">${kmoney(paid)}</b></div><div class="stat glass"><small>Còn nợ</small><b class="${total-paid>0?'neg':'pos'}">${total-paid?kmoney(total-paid):'0đ'}</b></div></div>
-    ${rows.length?`<div class="stmt">${rows.map(l=>{run+=l.status==='DA_DONG'?0:l.amount;return `<div class="st-row">
+    <div class="sub" style="padding:0 4px">Mới nhất ở trên · giống hệt Sổ thu chi lọc theo ${esc(name)}</div>
+    ${rowsAll.length?`<div class="stmt">${rowsAll.map(l=>`<div class="st-row ${isDep(l)?'dep':''}">
       <span class="st-date">${shortDate(l.date)}</span>
-      <div class="pname">${desc(l)}<small>${l.status==='DA_DONG'?`<span class="pos">✓ Đã trả</span> · ${atLabel(l.at)}${l.by?' · '+esc(l.by):''}`:'<span class="neg">Chưa trả</span>'}</small></div>
-      <b class="${l.amount<0?'pos':''}">${kmoney(l.amount)}</b></div>`;}).join('')}</div>`:'<div class="sub">Chưa có khoản nào.</div>'}
+      <div class="pname">${ledDesc(l)}<small>${ledStatus(l)}</small></div>
+      <b class="${l.amount<0?'pos':''}">${kmoney(l.amount)}</b></div>`).join('')}</div>`:'<div class="sub">Chưa có khoản nào.</div>'}
     ${creditsOf()[name]?`<div class="calc"><span>💳 Tiền gửi trước còn: <b class="pos">${money(creditsOf()[name])}</b> – tự trừ vào khoản nợ mới</span></div>`:''}
     <div class="sub">Số âm là tiền đang dư. Khoản ghi “trừ tiền gửi trước” là đã trả bằng tiền gửi. Có sai sót thì báo chủ hội ${esc(ownerName())} để chỉnh trong sổ.</div>
     <button class="btn tonal" data-act="copyStmt" data-name="${esc(name)}"><span class="ms">content_copy</span>Sao chép sao kê</button>`);
-  openStatement.text=()=>[`📄 Sao kê ${name}`,...rows.map(l=>`${shortDate(l.date)} ${desc(l).replace(/<[^>]+>/g,'')}: ${kmoney(l.amount)} ${l.status==='DA_DONG'?'✓':'(chưa trả)'}`),`Còn nợ: ${money(total-paid)}`].join('\n');
+  openStatement.text=()=>[`📄 Sao kê ${name}`,...rows.map(l=>`${shortDate(l.date)} ${ledDesc(l).replace(/<[^>]+>/g,'')}: ${kmoney(l.amount)} ${l.status==='DA_DONG'?'✓':'(chưa trả)'}`),`Còn nợ: ${money(total-paid)}`].join('\n');
 }
 
 /* ---------- chia sẻ ---------- */
