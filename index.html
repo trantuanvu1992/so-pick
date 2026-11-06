@@ -454,6 +454,8 @@ button.prow{width:100%;text-align:left;font:inherit;color:inherit}
 .fbar{display:block;width:100%;height:5px;border-radius:9px;background:rgba(0,0,0,.08);margin-top:4px;overflow:hidden}.fbar i{display:block;height:100%;background:#A3264A;border-radius:9px}
 .st-row.dep{opacity:.75}.st-row.dep b{color:var(--muted)}
 .cover td.zero{color:var(--lose);background:color-mix(in srgb,var(--lose) 8%,transparent);font-weight:800}.cover td[data-act]{cursor:pointer}
+.su-box summary{cursor:pointer;font-weight:800;font-size:14px}.su-box summary small{display:block;font-weight:600;color:var(--muted);font-size:12px;margin-top:2px}.su-box[open]{display:flex;flex-direction:column;gap:8px}
+.su-court{display:grid;grid-template-columns:minmax(0,1.3fr) 1fr auto 1fr;gap:6px;align-items:center}.su-court .inp{height:40px;padding:0 8px}
 .rp{display:flex;flex-direction:column;gap:10px}.rp h3{margin:6px 2px 0}.rp h3 small{font-weight:600;text-transform:none;letter-spacing:0}
 .rp-hero{position:relative;background:linear-gradient(135deg,#0E6A6A,#1C8C7A);color:#fff;border-radius:22px;padding:12px 12px 14px}
 .rp-hero .icon-btn{color:#fff}.rp-hero .icon-btn[disabled]{opacity:.3}.rp-x{position:absolute;top:6px;right:6px}
@@ -671,8 +673,8 @@ setTimeout(function(){if(!window.__SOPICK_END__){var v=document.getElementById('
 /* ====== CẤU HÌNH BẢN MOBILE ======
  * Dán link web app Apps Script (…/exec) vào giữa 2 dấu nháy dưới đây.
  * (Hoặc mở 1 lần: https://<tên>.github.io/<repo>/?api=<link …/exec> – app tự nhớ link trên máy đó.) */
-window.SOPICK_API = 'https://script.google.com/macros/s/AKfycbyc6eAI9bkych84fO0vrivEDCFcdBNjaYYbgxExGznaxMw6I0BguQQHO8_HpNmyfV4x/exec';
-window.SOPICK_BUILD = '06/11/2026 13:53';
+window.SOPICK_API = 'https://script.google.com/macros/s/AKfycbwADPV7P0z5tdS3jotiILErF3HKfY1NQrREnBI9sKxDpyDWP0kqo1D0kILbKMumAFvt/exec';
+window.SOPICK_BUILD = '06/11/2026 14:50';
 (function(){ var FILE=window.SOPICK_API; window.SOPICK_FILE_API=FILE;
   try{ var q=new URLSearchParams(location.search).get('api');
     if(q&&/^https:\/\/script\.google\.com\/.+\/exec$/.test(q)){ localStorage.setItem('sopick_api',q); localStorage.setItem('sopick_api_base',FILE); history.replaceState(null,'',location.pathname); }
@@ -702,7 +704,8 @@ function makeStats(players,opt){
   // part/opp = trong BUỔI NÀY · partP/oppP = các buổi trước (chu kỳ xoay tour) · luck = độ "may" cộng dồn (đồng đội mạnh hơn đối thủ)
   const fx={}; ((opt&&opt.fixed)||[]).forEach(([a,b])=>{ if(idx[a]!==undefined&&idx[b]!==undefined){ fx[idx[a]]=idx[b]; fx[idx[b]]=idx[a]; } });
   return {n,idx,games:new Array(n).fill(0),rest:new Array(n).fill(0),part:z(),opp:z(),partP:z(),oppP:z(),R,mu,
-    lastP:z(),lastO:z(),round:0,fixed:fx, // lastP/lastO = lượt gần nhất đã cặp / đã gặp trong buổi (để lặp thì lặp cặp đã lâu)
+    lastP:z(),lastO:z(),round:0,fixed:fx,seenM:(()=>{ const sm=opt&&opt.seenM; if(!sm) return null; const o={}; // khoá số theo chỉ số người (nhanh)
+      Object.entries(sm).forEach(([k,v])=>{ const [t1,t2]=k.split('|').map(t=>t.split('&').map(p=>idx[p])); if([...t1,...t2].some(i=>i===undefined)) return; o[qKey(t1[0],t1[1],t2[0],t2[1])]=v; }); return o; })(), // lastP/lastO = lượt gần nhất đã cặp / đã gặp trong buổi (để lặp thì lặp cặp đã lâu)
     luck:players.map(p=>R&&opt.luck?+opt.luck[p]||0:0)};
 }
 function applyMatch(st,m){
@@ -725,7 +728,7 @@ function addLuck(st,A,B){
 }
 // Trọng số: lặp cặp TRONG BUỔI phạt rất nặng; lặp với các buổi trước phạt nhẹ (chỉ để xoay tour); cân trình & bù may theo trình
 // Thứ tự ưu tiên: (1) trình 2 đội cân · (2) số trận đều (gần như bắt buộc, ở scoreSchedule) · (3) không lặp cặp trong buổi, ưu tiên cặp mới · (4) bù "may đồng đội" qua các buổi
-const W_EXP=400, W_NEW=6, W_REC=12, W_FIX=400, W_PART=60, W_PART_P=16, W_OPP=2, W_OPP_P=0.5, W_BAL=40, W_LUCK=10, W_MIX=+((typeof globalThis!=='undefined'&&globalThis.__WMIX)||10), W_QUAD=80;
+const W_SAME=50, W_EXP=400, W_NEW=6, W_REC=12, W_FIX=400, W_PART=60, W_PART_P=16, W_OPP=2, W_OPP_P=0.5, W_BAL=40, W_LUCK=10, W_MIX=+((typeof globalThis!=='undefined'&&globalThis.__WMIX)||10), W_QUAD=80;
 /** Trận các buổi trước (trong chu kỳ): chỉ cộng số lần đã CẶP / đã GẶP (ma trận riêng), không cộng số trận (số trận bù riêng bằng carry). */
 function applyPrior(st,m){
   const A=m.a.map(p=>st.idx[p]), B=m.b.map(p=>st.idx[p]);
@@ -744,11 +747,15 @@ function oppCost(st,a,b){ return W_OPP*st.opp[a][b]+W_OPP_P*st.oppP[a][b]+(st.op
 function balCost(st,A,B){ if(!st.R) return 0; const t=T=>T.reduce((s,i)=>s+st.R[i],0)/T.length; const d=(t(A)-t(B))/100; return W_BAL*d*d; }
 /** Thưởng khi 4 người trong 1 trận có cặp CHƯA TỪNG chạm nhau (chưa cặp, chưa gặp) → để ai cũng gặp nhau ít nhất 1 lần. */
 function newBonus(st,q){ let b=0; for(let i=0;i<4;i++) for(let j=i+1;j<4;j++){ const x=q[i],y=q[j]; if(!(st.partP[x][y]+st.oppP[x][y]+st.part[x][y]+st.opp[x][y])) b-=W_NEW; } return b; }
+const mKey=(a,b,c,d)=>{ const t1=[a,b].sort().join('&'), t2=[c,d].sort().join('&'); return t1<t2?t1+'|'+t2:t2+'|'+t1; };
+/** Trận 2v2 y hệt (cùng 2 đội) đã từng đánh → phạt, để lâu dài ai cũng được trải nhiều "kiểu trận" khác nhau. */
+function qKey(a,b,c,d){ const t1=a<b?a*64+b:b*64+a, t2=c<d?c*64+d:d*64+c; return t1<t2?t1*4096+t2:t2*4096+t1; }
+function sameCost(st,o){ if(!st.seenM) return 0; return (st.seenM[qKey(o[0],o[1],o[2],o[3])]||0)*W_SAME; }
 function quadCost(st,q){ // q = 4 index; trả về [cost, cách chia tốt nhất]
   const opts=[[q[0],q[1],q[2],q[3]],[q[0],q[2],q[1],q[3]],[q[0],q[3],q[1],q[2]]];
   let best=null,bc=Infinity;
   for(const o of opts){
-    const c = newBonus(st,q) + teamCost(st,o[0],o[1]) + teamCost(st,o[2],o[3]) + (st.quads&&st.quads.has([...o].sort((a,b)=>a-b).join())?W_QUAD:0)
+    const c = newBonus(st,q) + sameCost(st,o) + teamCost(st,o[0],o[1]) + teamCost(st,o[2],o[3]) + (st.quads&&st.quads.has([...o].sort((a,b)=>a-b).join())?W_QUAD:0)
             + oppCost(st,o[0],o[2])+oppCost(st,o[0],o[3])+oppCost(st,o[1],o[2])+oppCost(st,o[1],o[3])
             + balCost(st,[o[0],o[1]],[o[2],o[3]]) + Math.random()*0.5;
     if(c<bc){bc=c;best=o;}
@@ -840,6 +847,7 @@ function scoreSchedule(players,all,opt){
   if(opt&&opt.carry){ const T=players.map((p,i)=>g[i]+(opt.carry[p]||0)), mu=T.reduce((a,b)=>a+b,0)/T.length; s+=T.reduce((a,t)=>a+(t-mu)**2,0)*300; }
   for(let i=0;i<st.n;i++) for(let j=i+1;j<st.n;j++){ if(st.fixed[i]===j) continue; s+=W_PART*Math.max(0,st.part[i][j]-1)*5 + W_PART*st.part[i][j]**2 + (W_PART_P+6*st.partP[i][j])*st.part[i][j]*st.partP[i][j] + st.opp[i][j]**2 + W_OPP_P*st.opp[i][j]*st.oppP[i][j]; }
   s+=(st.quadRep||0)*W_QUAD*3; // cùng 4 người gặp lại trong buổi
+  if(st.seenM){ const seenNow={}; all.forEach(m=>{ const A=m.a.map(p=>st.idx[p]),B=m.b.map(p=>st.idx[p]); if([...A,...B].some(i=>i===undefined)||A.length<2||B.length<2) return; const k=qKey(A[0],A[1],B[0],B[1]); s+=((st.seenM[k]||0)+(seenNow[k]||0))*W_SAME*2; seenNow[k]=(seenNow[k]||0)+1; }); }
   if(st.R){ // mỗi người: số trận thắng KỲ VỌNG (theo trình 2 đội) ≈ ½ số trận → không ai bị xếp toàn kèo dưới / kèo trên
     const E=new Array(st.n).fill(0), G=new Array(st.n).fill(0);
     all.forEach(m=>{ const A=m.a.map(p=>st.idx[p]).filter(i=>i!==undefined), B=m.b.map(p=>st.idx[p]).filter(i=>i!==undefined); if(!A.length||!B.length) return;
@@ -1181,6 +1189,7 @@ const Mock=(()=>{
     api_updateSession(sid,pt,pn,by){pin(pn);const s=db.sessions.find(x=>x.id===sid);
       (pt.renumber||[]).forEach(r=>{const m=db.matches.find(x=>x.id===r.id);if(m)m.no=r.no;});
       if(pt.matches){db.matches=db.matches.filter(m=>m.sessionId!==sid||m.win||m.mode);pt.matches.forEach(m=>db.matches.push({...m,id:id('T'),sessionId:sid,sa:null,sb:null,win:'',by:'',at:''}));}
+      if(pt.setup){const u=pt.setup;if(u.date&&u.date!==s.date){db.ledger.filter(l=>l.sessionId===sid).forEach(l=>l.date=u.date);s.date=u.date;}Object.assign(s,{start:u.start||s.start,duration:+u.duration||s.duration,courts:+u.courts||s.courts,minPer:+u.minPer||s.minPer,courtTimes:u.courtTimes||s.courtTimes,courtNames:u.courtNames||s.courtNames,courtPrice:u.price!==undefined?+u.price||0:s.courtPrice,playType:u.type||s.playType});}
       if(pt.freeSlots){s.freeSlots=pt.freeSlots;s.freeK=+pt.freeK||0;}if(pt.sessType)s.sessType=pt.sessType;
       if(pt.players)s.players=pt.players;if(pt.fee!==undefined)s.fee=Math.max(0,+pt.fee||0);
       if(pt.costs)Object.assign(s,{costSan:+pt.costs.san||0,costNuoc:+pt.costs.nuoc||0,costKhac:+pt.costs.khac||0,costNote:pt.costs.note||''});
@@ -1435,11 +1444,13 @@ function balLine(players,ms,date){ if(!balOn()||!S.allMatches) return ''; const 
   const E={},G={}; ms.forEach(m=>{const A=m.a.filter(Boolean),B=m.b.filter(Boolean); if(!A.length||!B.length) return; const ta=A.reduce((t,p)=>t+r(p),0)/A.length, tb=B.reduce((t,p)=>t+r(p),0)/B.length, ea=1/(1+10**((tb-ta)/400));
     A.forEach(p=>{E[p]=(E[p]||0)+ea;G[p]=(G[p]||0)+1;}); B.forEach(p=>{E[p]=(E[p]||0)+1-ea;G[p]=(G[p]||0)+1;}); });
   const ev=Object.keys(E).map(p=>Math.round(E[p]*100/G[p]));
-  return `<span>🎯 Cơ hội thắng mỗi người (theo trình): <b>${Math.min(...ev)}–${Math.max(...ev)}%</b> · càng gần 50% càng công bằng</span><span>⚖️ Chênh trình 2 đội TB <b>${Math.round(gaps.reduce((a,b)=>a+b,0)/(gaps.length||1))}</b> điểm · trận lệch > 150: <b>${gaps.filter(g=>g>150).length}/${gaps.length}</b> · trình đồng đội TB mỗi người lệch ${Math.round(lo)} → +${Math.max(0,Math.round(hi))}</span>`; }
+  const sm={}; histMs(date).forEach(m=>{ if(m.a[1]&&m.b[1]) sm[mKey(m.a[0],m.a[1],m.b[0],m.b[1])]=1; }); const dupM=ms.filter(m=>m.a[1]&&m.b[1]&&sm[mKey(m.a[0],m.a[1],m.b[0],m.b[1])]).length;
+  return `<span>🔁 Trận y hệt đã từng đánh (cùng 2 đội): <b>${dupM}</b>/${ms.length}</span><span>🎯 Cơ hội thắng mỗi người (theo trình): <b>${Math.min(...ev)}–${Math.max(...ev)}%</b> · càng gần 50% càng công bằng</span><span>⚖️ Chênh trình 2 đội TB <b>${Math.round(gaps.reduce((a,b)=>a+b,0)/(gaps.length||1))}</b> điểm · trận lệch > 150: <b>${gaps.filter(g=>g>150).length}/${gaps.length}</b> · trình đồng đội TB mỗi người lệch ${Math.round(lo)} → +${Math.max(0,Math.round(hi))}</span>`; }
 const balOn=()=>store.get('sopick_bal')!=='0';
 /** Tuỳ chọn cân trình cho bộ xếp lịch. */
 function balOpt(players,cur,date){ if(!balOn()||!S.allMatches) return {}; const {R}=skillRatings(date), rating={}; players.forEach(p=>rating[p]=R[p]??1000);
-  return {rating,luck:luckOf(histMs(date),R)}; }
+  const seenM={}; histMs(date).forEach(m=>{ if(m.a[1]&&m.b[1]){ const k=mKey(m.a[0],m.a[1],m.b[0],m.b[1]); seenM[k]=(seenM[k]||0)+1; } });
+  return {rating,luck:luckOf(histMs(date),R),seenM}; }
 /** Mọi trận có tỷ số trước ngày date (không tính giao lưu / buổi thử) – dùng để bù "may đồng đội" lâu dài. */
 function histMs(date){ const ss={}; (S.boot?.sessions||[]).forEach(x=>ss[x.id]=x);
   return (S.allMatches||[]).map(amObj).filter(m=>{const x=ss[m.sid];return x&&!isTrial(x)&&m.win&&m.mode!=='GL'&&(!date||x.date<date);}); }
@@ -2774,11 +2785,19 @@ function openEdit(){
   const E={fee:s.fee, players:new Set(s.players), guests:s.players.filter(p=>!regularsFor(s.date).includes(p)),
     san:s.costSan||autoSan||0, nuoc:s.costNuoc||0, khac:s.costKhac||0, note:s.costNote||'',
     share:isAutoThang(s)||(s.share?s.share.enabled!==false:true), rules:{...(s.share?.rules||{})}, extra:new Set(extraOf(s)), K:s.freeK||0, stype:sessType(s), vl:s.share?.vl||lastVL()};
+  const SU0={date:s.date,minPer:s.minPer,courts:s.courts,times:[0,1,2].map(i=>({...((s.courtTimes||[])[i]||{start:s.start,end:addMin(s.start,s.duration)})})),
+    names:[0,1,2].map(i=>courtName(s,i+1)),price:s.courtPrice||0,type:s.playType||'DN'};
+  E.su=JSON.parse(JSON.stringify(SU0));
+  const suKey=u=>JSON.stringify([u.minPer,u.courts,u.times.slice(0,u.courts),u.type]);
+  const suSched=()=>suKey(E.su)!==suKey(SU0), suAny=()=>JSON.stringify({...E.su,times:E.su.times.slice(0,E.su.courts),names:E.su.names.slice(0,E.su.courts)})!==JSON.stringify({...SU0,times:SU0.times.slice(0,SU0.courts),names:SU0.names.slice(0,SU0.courts)});
+  /** Buổi "ảo" theo giờ/sân/phút đang sửa → dùng để xếp lịch & tính tiền sân gợi ý. */
+  const sv=()=>{ const u=E.su, P=buildPlan(u.times.slice(0,u.courts),u.minPer); return {...s,date:u.date,minPer:u.minPer,courts:u.courts,courtTimes:u.times.slice(0,u.courts),courtNames:u.names.slice(0,u.courts),courtPrice:u.price,playType:u.type,start:P.start,duration:P.duration}; };
+  openEdit.sv=sv;
   const K0=s.freeK||0, ex0=extraOf(s).length>0;
   const exNow=()=>[...E.extra].filter(p=>!E.players.has(p));
-  const schedChanged=()=>E.force||playersChanged()||E.K!==K0||(exNow().length>0)!==ex0;
-  const fullRows=()=>{const all=Array.from({length:s.courts},(_,i)=>i+1);const full=s.courtTimes?buildPlan(s.courtTimes,s.minPer).plan:Array.from({length:Math.max(1,Math.floor(s.duration/s.minPer))},()=>all);return full.map((cs,i)=>({round:i+1,courts:cs.slice()}));};
-  const resched=()=>{const m=reschedulePlan(s,played,[...E.players],{K:E.K,ex:exNow().length>0});E.free=reschedulePlan.free;E.renum=reschedulePlan.renumber||[];return m;};
+  const schedChanged=()=>E.force||suSched()||playersChanged()||E.K!==K0||(exNow().length>0)!==ex0;
+  const fullRows=()=>{const v=sv();return buildPlan(v.courtTimes,v.minPer).plan.map((cs,i)=>({round:i+1,courts:cs.slice()}));};
+  const resched=()=>{const m=reschedulePlan(sv(),played,[...E.players],{K:E.K,ex:exNow().length>0});E.free=reschedulePlan.free;E.renum=reschedulePlan.renumber||[];return m;};
   const rule=p=>E.rules[p]||(E.stype==='THANG'?thangRule(p,s.date,E.vl):(E.rules[p]=defaultRule(p,s.date)));
   const playersChanged=()=>E.players.size!==s.players.length||s.players.some(p=>!E.players.has(p));
   const draw=()=>{
@@ -2792,12 +2811,21 @@ function openEdit(){
     const feeBtn=v=>`<button data-act="eFee" data-v="${v}" class="${E.fee===v?'on':''}">${v?kmoney(v):'0đ · đánh vui'}</button>`;
     const y=$('#sheetBody').scrollTop;
     $('#sheetBody').innerHTML=`<div class="sh-head"><div><h2>Sửa buổi ${shortDate(s.date)}</h2><div class="sub">Đổi gì cũng được, bấm Lưu 1 lần · tiền tự chia lại</div></div><button class="icon-btn" data-act="closeSheet" aria-label="Đóng"><span class="ms">close</span></button></div>
+      ${isCup(s)?'':(()=>{ const u=E.su, v=sv(), P=buildPlan(v.courtTimes,u.minPer), nM=P.plan.reduce((t,cs)=>t+cs.length,0);
+        return `<details class="field su-box" ${E.suOpen||suAny()?'open':''} data-sutoggle><summary>⏱ Ngày · giờ · sân · phút/trận <small>${shortDate(u.date)} · ${v.start}–${addMin(v.start,v.duration)} · ${u.courts} sân · ${u.minPer}′ · <b>${nM} trận chính</b></small></summary>
+        <div class="grid2"><div class="field"><label for="suDate">Ngày</label><input class="inp" type="date" id="suDate" value="${u.date}"></div>
+          <div class="field"><label for="suMin">Phút / trận</label><div class="seg mini">${[10,12,15,20].map(x=>`<button data-act="suSet" data-k="minPer" data-v="${x}" class="${u.minPer===x?'on':''}">${x}′</button>`).join('')}</div></div></div>
+        <div class="field"><label>Số sân</label><div class="seg mini">${[1,2,3].map(x=>`<button data-act="suSet" data-k="courts" data-v="${x}" class="${u.courts===x?'on':''}">${x} sân</button>`).join('')}</div></div>
+        ${u.times.slice(0,u.courts).map((t,i)=>`<div class="su-court"><input class="inp" data-suname="${i}" value="${esc(u.names[i]||'Sân '+(i+1))}" aria-label="Tên sân ${i+1}"><input class="inp" type="time" data-sut="${i}" data-k="start" value="${t.start}" aria-label="Bắt đầu"><span>–</span><input class="inp" type="time" data-sut="${i}" data-k="end" value="${t.end}" aria-label="Kết thúc"></div>`).join('')}
+        <div class="grid2"><div class="field"><label>Thể loại</label><div class="seg mini">${['DN','DON','MIX'].map(x=>`<button data-act="suSet" data-k="type" data-v="${x}" class="${u.type===x?'on':''}">${TYPE_SHORT[x]}</button>`).join('')}</div></div>
+          <div class="field"><label for="suPrice">Giá sân / giờ</label><input class="inp" id="suPrice" inputmode="numeric" value="${u.price||''}" placeholder="220000"></div></div>
+        <div class="sub">${P.plan.length} lượt × ${u.courts} sân = <b>${nM} trận chính</b>${played.length&&suSched()?` · <span class="neg">${played.length} trận đã có tỷ số giữ nguyên ở lượt cũ</span>`:''}${suSched()?' · lịch các trận chưa đánh sẽ được xếp lại':''}</div></details>`; })()}
       <div class="field"><label>Luật tiền thua mỗi trận (mỗi người đội thua)</label>
         <div class="seg">${[0,5000,10000].map(feeBtn).join('')}<input class="inp" id="eFeeIn" inputmode="numeric" value="${[0,5000,10000].includes(E.fee)?'':E.fee}" placeholder="khác" style="width:90px;height:38px"></div>
         ${E.fee?'':`<div class="sub">Buổi đánh vui: vẫn lưu tỷ số, BXH, không ai phải đóng tiền thua.</div>`}</div>
       <div class="field"><label>Tiền sân / nước đã trả (${esc(ownerName())} ứng)</label>
         <div class="grid3"><input class="inp" id="eSan" inputmode="numeric" value="${E.san||''}" placeholder="Sân" aria-label="Tiền sân"><input class="inp" id="eNuoc" inputmode="numeric" value="${E.nuoc||''}" placeholder="Nước" aria-label="Nước"><input class="inp" id="eKhac" inputmode="numeric" value="${E.khac||''}" placeholder="Khác" aria-label="Chi khác"></div>
-        ${autoSan&&E.san!==autoSan?`<button class="btn text sm" data-act="eAutoSan">Dùng giờ sân × giá = ${kmoney(autoSan)}</button>`:''}</div>
+        ${(()=>{const v=sv(),a=v.courtPrice?Math.round(v.courtTimes.reduce((t,c)=>t+Math.max(0,hm2m(c.end)-hm2m(c.start)),0)/60*v.courtPrice):0;return a&&E.san!==a?`<button class="btn text sm" data-act="eAutoSan">Dùng giờ sân × giá = ${kmoney(a)}</button>`:'';})()}</div>
       ${isCup(s)?'':`<div class="field"><label>Loại buổi</label><div class="seg">${['THANG','VL'].map(k=>`<button data-act="eStype" data-v="${k}" class="${E.stype===k?'on':''}">${STYPE_IC[k]} ${k==='THANG'?'Buổi tháng (quỹ trả sân)':'Vãng lai (chia tiền sân)'}</button>`).join('')}</div></div>`}
       <div class="mem" style="padding:2px 0"><div class="pname">Chia tiền sân/nước cho người tham dự<small>${E.stype==='THANG'?'Bật = <b>tự nhận</b>: ai đăng ký tháng thì quỹ trả, người ngoài đóng vãng lai · Tắt = quỹ trả toàn bộ cho mọi người':'Tắt = <b>quỹ hội trả toàn bộ tiền sân</b> (vd tháng đã đóng quỹ tháng, sân thuê theo tháng)'}</small></div><button class="switch ${E.share?'on':''}" data-act="eShare" aria-label="Chia tiền"></button></div>
       ${E.stype==='THANG'&&E.share?`<div class="hint">${thangInfo(payers,s.date,E.vl)}</div>`:''}
@@ -2835,7 +2863,7 @@ function openEdit(){
               ${rs.length?`<span>⏳ <b>${rs.length} trận dự trù</b> (nền cam sọc, ngoài giờ): người đánh ít được thêm 1 trận → ai cũng <b>${hi}</b> trận${Object.keys(cr).some(p=>(c[p]||0)>=hi)?` · ${esc(Object.keys(cr).filter(p=>(c[p]||0)>=hi).join(', '))} vào cho đủ 4 người (đánh thêm, tự nguyện)`:''}</span>`:''}</div>
             <div class="sub">Số trận chính/người: ${ps.map(p=>`${esc(p)} <b>${c[p]||0}</b>${cr[p]?`<small>+${cr[p]} dự trù</small>`:''}`).join(' · ')}</div>`; })()}
           ${(E.free||[]).length?`<div class="sub">🎲 ${(E.free||[]).length} lượt sân đánh vui: ${E.free.map(f=>addMin(s.start,(f[0]-1)*s.minPer)+(s.courts>1?' '+esc(courtShort(s,f[1])):'')).join(' · ')}</div>`:''}
-          <div class="prev">${E.preview.map(m=>`<div class="${m.reserve?'prsv':''}"><b>#${m.no}</b><span>${esc(tn(m.a))} <em>vs</em> ${esc(tn(m.b))}<br><em>${roundTime(s,m)}${s.courts>1?' · '+esc(courtName(s,m.court)):''}${m.rest&&m.rest.length?' · nghỉ: '+esc(m.rest.join(', ')):''}</em></span></div>`).join('')}</div>
+          <div class="prev">${E.preview.map(m=>`<div class="${m.reserve?'prsv':''}"><b>#${m.no}</b><span>${esc(tn(m.a))} <em>vs</em> ${esc(tn(m.b))}<br><em>${roundTime(sv(),m)}${sv().courts>1?' · '+esc(courtName(sv(),m.court)):''}${m.rest&&m.rest.length?' · nghỉ: '+esc(m.rest.join(', ')):''}</em></span></div>`).join('')}</div>
           <div class="sub">✅ Đây là phương án tốt nhất app tìm được (đã thử ~1.000 cách). Bấm <b>Lưu thay đổi</b> để áp dụng.</div></div>`;})():''}
       <div class="calc"><span>Tiền thua: <b>${E.fee?kmoney(E.fee)+'/người/trận':'không tính (đánh vui)'}</b> · đã có ${played.length} trận tỷ số</span>
         ${base?`<span>Chi ${money(base)} → ${E.share?`chia <b>${kmoney(sh.per)}/người</b> · thu lại ${money(shareTot)}`:'không chia, quỹ/chủ hội chịu'}</span>`:'<span>Chưa nhập tiền sân</span>'}
@@ -2845,6 +2873,11 @@ function openEdit(){
     const num=v=>parseInt(String(v).replace(/\D/g,''),10)||0;
     [['#eSan','san'],['#eNuoc','nuoc'],['#eKhac','khac']].forEach(([id,k])=>{$(id).onchange=()=>{E[k]=num($(id).value);draw();};});
     $('#eFeeIn').onchange=e=>{if(e.target.value!==''){E.fee=num(e.target.value);draw();}};
+    const suD=$('#suDate'); if(suD){ suD.onchange=()=>{E.su.date=suD.value||E.su.date;E.suOpen=true;draw();};
+      document.querySelectorAll('[data-suname]').forEach(el=>el.onchange=()=>{E.su.names[+el.dataset.suname]=el.value.trim()||('Sân '+(+el.dataset.suname+1));E.suOpen=true;draw();});
+      document.querySelectorAll('[data-sut]').forEach(el=>el.onchange=()=>{if(!el.value)return;E.su.times[+el.dataset.sut][el.dataset.k]=el.value;E.suOpen=true;E.preview=null;draw();});
+      $('#suPrice').onchange=e=>{E.su.price=num(e.target.value);E.suOpen=true;draw();};
+      const dt=document.querySelector('[data-sutoggle]'); dt.ontoggle=()=>{E.suOpen=dt.open;}; }
     document.querySelectorAll('[data-efx]').forEach(el=>el.onchange=()=>{const p=el.dataset.efx;(E.rules[p]=E.rules[p]||{...rule(p)}).amount=num(el.value);draw();});
     $('#eGo').onclick=save;
   };
@@ -2852,6 +2885,7 @@ function openEdit(){
     const patch={...(E.stype!==sessType(s)?{sessType:E.stype}:{}),fee:E.fee,costs:{san:E.san,nuoc:E.nuoc,khac:E.khac,note:E.note},share:E.stype==='THANG'&&!isCup(s)?(E.share?{enabled:true,auto:'THANG',vl:E.vl,rules:thangOverrides(Object.fromEntries([...E.players,...E.extra].map(p=>[p,rule(p)])),s.date,E.vl),extra:[...E.extra].filter(p=>!E.players.has(p))}:{enabled:false,off:true,rules:{},extra:[...E.extra].filter(p=>!E.players.has(p))})
       :{enabled:E.share,rules:Object.fromEntries([...E.players,...E.extra].map(p=>[p,rule(p)])),extra:[...E.extra].filter(p=>!E.players.has(p))}};
     if(E.players.size<4){toast('Cần ít nhất 4 người');return;}
+    if(!isCup(s)&&suAny()){ const v=sv(); if(!v.duration){toast('Giờ sân chưa hợp lệ');return;} patch.setup={date:E.su.date,start:v.start,duration:v.duration,courts:v.courts,minPer:v.minPer,courtTimes:v.courtTimes,courtNames:v.courtNames,price:v.courtPrice,type:v.playType}; }
     if(playersChanged()) patch.players=[...E.players];
     if(schedChanged()&&(unplayed.length||!S.matches.length)&&!isCup(s)){ if(!E.preview) E.preview=resched(); patch.matches=E.preview; patch.renumber=E.renum||[]; patch.freeSlots=E.free||[]; patch.freeK=E.K; }
     else if(!exNow().length&&(s.freeSlots||[]).length){ patch.freeSlots=[]; patch.freeK=0; }
@@ -2862,7 +2896,8 @@ function openEdit(){
 }
 const EditActs={
   eFee(t){openEdit.E.fee=+t.dataset.v;openEdit.draw();},
-  eAutoSan(){const s=S.session;openEdit.E.san=Math.round(s.courtTimes.reduce((t,c)=>t+Math.max(0,hm2m(c.end)-hm2m(c.start)),0)/60*s.courtPrice);openEdit.draw();},
+  eAutoSan(){const v=openEdit.sv();openEdit.E.san=Math.round(v.courtTimes.reduce((t,c)=>t+Math.max(0,hm2m(c.end)-hm2m(c.start)),0)/60*v.courtPrice);openEdit.draw();},
+  suSet(t){const E=openEdit.E,k=t.dataset.k;E.su[k]=k==='type'?t.dataset.v:+t.dataset.v;E.suOpen=true;E.preview=null;openEdit.draw();},
   eShare(){openEdit.E.share=!openEdit.E.share;openEdit.draw();},
   eStype(t){const E=openEdit.E;E.stype=t.dataset.v;E.share=true;E.rules={};if(E.stype==='VL')[...E.players,...E.extra].forEach(p=>E.rules[p]={mode:'eq',amount:lastVL()});openEdit.draw();},
   eToggle(t){const E=openEdit.E,n=t.dataset.name;if(E.players.has(n))E.players.delete(n);else{E.players.add(n);E.extra.delete(n);}E.preview=null;openEdit.draw();},
