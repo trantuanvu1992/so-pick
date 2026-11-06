@@ -671,8 +671,8 @@ setTimeout(function(){if(!window.__SOPICK_END__){var v=document.getElementById('
 /* ====== CẤU HÌNH BẢN MOBILE ======
  * Dán link web app Apps Script (…/exec) vào giữa 2 dấu nháy dưới đây.
  * (Hoặc mở 1 lần: https://<tên>.github.io/<repo>/?api=<link …/exec> – app tự nhớ link trên máy đó.) */
-window.SOPICK_API = 'https://script.google.com/macros/s/AKfycbylO50GMDf4P9XfIVQV7WMppUx6mH2IauqAbyCKdDLcb5siAvfR_2sv-J1QH1xHEqQl/exec';
-window.SOPICK_BUILD = '06/11/2026 13:44';
+window.SOPICK_API = 'https://script.google.com/macros/s/AKfycbwADPV7P0z5tdS3jotiILErF3HKfY1NQrREnBI9sKxDpyDWP0kqo1D0kILbKMumAFvt/exec';
+window.SOPICK_BUILD = '06/11/2026 13:53';
 (function(){ var FILE=window.SOPICK_API; window.SOPICK_FILE_API=FILE;
   try{ var q=new URLSearchParams(location.search).get('api');
     if(q&&/^https:\/\/script\.google\.com\/.+\/exec$/.test(q)){ localStorage.setItem('sopick_api',q); localStorage.setItem('sopick_api_base',FILE); history.replaceState(null,'',location.pathname); }
@@ -960,8 +960,19 @@ function addReserve(players,main,courts,opt){
   while(k>0){ const c=Math.min(cap,k); plan.push(Array.from({length:c},(_,i)=>i+1)); k-=c; }
   const L=Math.max(...main.map(m=>m.round));
   // người thiếu trận BẮT BUỘC vào trận dự trù (bỏ qua bù trận lịch sử); người vào cho đủ 4 = ai lịch sử đánh ít hơn
-  const carry={}; players.forEach(p=>carry[p]=g[p]<mx?-1000:((opt.carry||{})[p]||0));
-  const r=generateSchedule(players,plan,cap,main,L+1,200,{...opt,carry,prio:[],late:false});
+  const def=players.filter(p=>g[p]<mx), others=players.filter(p=>g[p]>=mx);
+  let r;
+  const slots=plan.reduce((t,cs)=>t+cs.length,0)*per, nC=(n,k)=>{let r=1;for(let i=0;i<k;i++)r=r*(n-i)/(i+1);return r;};
+  if(slots-def.length>0&&slots-def.length<=others.length&&nC(others.length,slots-def.length)<=60){ // thử mọi cách chọn người vào cho đủ, giữ trận cân & không lặp cặp nhất
+    const need=slots-def.length, combos=[]; const pick=(st,arr)=>{ if(arr.length===need){ combos.push(arr); return; } for(let i=st;i<others.length;i++) pick(i+1,[...arr,others[i]]); }; pick(0,[]);
+    let best=null; combos.forEach(fill=>{ const carry={}; players.forEach(p=>carry[p]=def.includes(p)||fill.includes(p)?-1000:1000);
+      const x=generateSchedule(players,plan,cap,main,L+1,60,{...opt,carry,prio:[],late:false});
+      if(x.matches&&x.matches.length&&(!best||x.score<best.score)) best=x; });
+    r=best||{matches:[]};
+  } else {
+    const carry={}; players.forEach(p=>carry[p]=g[p]<mx?-1000:((opt.carry||{})[p]||0));
+    r=generateSchedule(players,plan,cap,main,L+1,200,{...opt,carry,prio:[],late:false});
+  }
   return (r.matches||[]).map(m=>({...m,reserve:true}));
 }
 /*ALG-END*/
