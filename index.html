@@ -671,8 +671,8 @@ setTimeout(function(){if(!window.__SOPICK_END__){var v=document.getElementById('
 /* ====== CẤU HÌNH BẢN MOBILE ======
  * Dán link web app Apps Script (…/exec) vào giữa 2 dấu nháy dưới đây.
  * (Hoặc mở 1 lần: https://<tên>.github.io/<repo>/?api=<link …/exec> – app tự nhớ link trên máy đó.) */
-window.SOPICK_API = 'https://script.google.com/macros/s/AKfycbycRgnALjMmAyJRRa8MP0QZi09GwRfvInwBiF4sx5f8hejOIn-uC0JSlzYA8sPkVxdC/exec';
-window.SOPICK_BUILD = '06/11/2026 10:40';
+window.SOPICK_API = 'https://script.google.com/macros/s/AKfycbwADPV7P0z5tdS3jotiILErF3HKfY1NQrREnBI9sKxDpyDWP0kqo1D0kILbKMumAFvt/exec';
+window.SOPICK_BUILD = '06/11/2026 13:16';
 (function(){ var FILE=window.SOPICK_API; window.SOPICK_FILE_API=FILE;
   try{ var q=new URLSearchParams(location.search).get('api');
     if(q&&/^https:\/\/script\.google\.com\/.+\/exec$/.test(q)){ localStorage.setItem('sopick_api',q); localStorage.setItem('sopick_api_base',FILE); history.replaceState(null,'',location.pathname); }
@@ -1400,7 +1400,8 @@ function skillRatings(beforeDate){
     const ra=A.reduce((t,p)=>t+r(p),0)/A.length, rb=B.reduce((t,p)=>t+r(p),0)/B.length, ea=1/(1+10**((rb-ra)/400)), sa=m.win==='A'?1:0;
     const k=16*(1+Math.min(11,Math.abs((+m.sa||0)-(+m.sb||0)))/11);
     A.forEach(p=>{R[p]=r(p)+k*(sa-ea); if(!it) N[p]=(N[p]||0)+1;}); B.forEach(p=>{R[p]=r(p)+k*((1-sa)-(1-ea)); if(!it) N[p]=(N[p]||0)+1;}); });
-  Object.keys(R).forEach(p=>R[p]=Math.round(R[p]));
+  // ít trận thì chưa chắc trình thật → kéo về 1000 theo độ tin cậy (n trận / (n+8)); đánh càng nhiều càng giữ nguyên điểm
+  Object.keys(R).forEach(p=>R[p]=Math.round(1000+(R[p]-1000)*(N[p]||0)/((N[p]||0)+8)));
   skillRatings.k=k0; skillRatings.v={R,N}; return skillRatings.v;
 }
 /** "May đồng đội" TB mỗi trận (đơn vị 100 điểm trình) trong các trận cho trước: đồng đội mạnh hơn mức trung bình của nhóm → dương. */
@@ -2234,7 +2235,7 @@ function skillBoard(){
   <div class="panel glass">${list.map((p,i)=>{ const lk=n[p]?Math.round(L[p]/n[p]):0;
     return `<button class="lrow" data-act="player" data-name="${esc(p)}">${avatar(p)}<div class="pname">${esc(p)}<small>${N[p]||0} trận · đồng đội TB ${lk>0?'+':''}${lk} so với mức chung ${Math.abs(lk)<=30?'(cân)':lk>0?'(được cặp mạnh → sẽ bù lại)':'(cặp yếu hơn → sẽ được bù)'}</small></div>
       <span class="lamt"><b>${r(p)}</b> <span class="wbar"><i style="width:${mx>mn?Math.round((r(p)-mn)*100/(mx-mn)):50}%"></i></span></span></button>`; }).join('')}</div>
-  <div class="sub" style="padding:0 6px">Elo tính từ mọi trận có tỷ số (không tính giao lưu), người mới bắt đầu 1000; thắng đậm được cộng nhiều hơn. Khi xếp lịch app ưu tiên: <b>① trình 2 đội cân → ② số trận đều → ③ không lặp cặp, ưu tiên cặp mới → ④ ai hay được cặp mạnh thì buổi sau cặp yếu hơn và ngược lại</b>. Càng đánh đều, số liệu càng chính xác.</div>`;
+  <div class="sub" style="padding:0 6px">Elo tính từ mọi trận có tỷ số (không tính giao lưu), người mới bắt đầu 1000; thắng đậm được cộng nhiều hơn. Ai còn ít trận thì điểm được kéo về gần 1000 (chưa đủ dữ liệu để chắc chắn), đánh càng nhiều càng chính xác. Khi xếp lịch app ưu tiên: <b>① trình 2 đội cân → ② số trận đều → ③ không lặp cặp, ưu tiên cặp mới → ④ ai hay được cặp mạnh thì buổi sau cặp yếu hơn và ngược lại</b>. Càng đánh đều, số liệu càng chính xác.</div>`;
 }
 function shareRank(){
   const p=S.rankP||'all', t=S.rankT||'all', R=rankData(p,t), md=['🥇','🥈','🥉'];
