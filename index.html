@@ -671,8 +671,8 @@ setTimeout(function(){if(!window.__SOPICK_END__){var v=document.getElementById('
 /* ====== CẤU HÌNH BẢN MOBILE ======
  * Dán link web app Apps Script (…/exec) vào giữa 2 dấu nháy dưới đây.
  * (Hoặc mở 1 lần: https://<tên>.github.io/<repo>/?api=<link …/exec> – app tự nhớ link trên máy đó.) */
-window.SOPICK_API = 'https://script.google.com/macros/s/AKfycbzohxHh_XJkYI7wtj1Ti4oHZ4xlAW_TCCvAxSIRnG5BO-jOnREAWLh7T40P-ycmn7bk/exec';
-window.SOPICK_BUILD = '06/11/2026 13:16';
+window.SOPICK_API = 'https://script.google.com/macros/s/AKfycbwADPV7P0z5tdS3jotiILErF3HKfY1NQrREnBI9sKxDpyDWP0kqo1D0kILbKMumAFvt/exec';
+window.SOPICK_BUILD = '06/11/2026 13:44';
 (function(){ var FILE=window.SOPICK_API; window.SOPICK_FILE_API=FILE;
   try{ var q=new URLSearchParams(location.search).get('api');
     if(q&&/^https:\/\/script\.google\.com\/.+\/exec$/.test(q)){ localStorage.setItem('sopick_api',q); localStorage.setItem('sopick_api_base',FILE); history.replaceState(null,'',location.pathname); }
@@ -734,7 +734,7 @@ function applyPrior(st,m){
 }
 /** Chi phí ghép đội (x,y) vs (z,w): lặp cặp/đối thủ + lệch trình 2 đội + người đang "may" lại được đồng đội mạnh. */
 function teamCost(st,x,y){ if(st.fixed[x]===y) return -W_FIX; // cặp cố định: luôn ghép, không tính lặp
-  let c=W_PART*st.part[x][y]**2+W_PART_P*st.partP[x][y];
+  let c=W_PART*st.part[x][y]**2+W_PART_P*st.partP[x][y]+6*st.partP[x][y]**2; // cặp càng nhiều lần ở các buổi trước càng bị đẩy lùi (tăng nhanh theo số lần)
   if(st.part[x][y]) c+=W_REC*Math.max(0,6-(st.round-st.lastP[x][y])); // buộc lặp thì lặp cặp đã lâu nhất
   if(st.fixed[x]!==undefined||st.fixed[y]!==undefined) c+=W_FIX; // người có cặp cố định mà ghép với người khác
   if(st.R){ c+=W_LUCK*(st.luck[x]*(st.R[y]-st.mu)+st.luck[y]*(st.R[x]-st.mu))/100;
@@ -838,7 +838,7 @@ function scoreSchedule(players,all,opt){
   const g=st.games; let s=(Math.max(...g)-Math.min(...g))*1000;
   // bù trận các buổi trước: buổi này lẻ trận thì người đã đánh dư nhận ít hơn (tổng cộng dồn càng đều càng tốt)
   if(opt&&opt.carry){ const T=players.map((p,i)=>g[i]+(opt.carry[p]||0)), mu=T.reduce((a,b)=>a+b,0)/T.length; s+=T.reduce((a,t)=>a+(t-mu)**2,0)*300; }
-  for(let i=0;i<st.n;i++) for(let j=i+1;j<st.n;j++){ if(st.fixed[i]===j) continue; s+=W_PART*Math.max(0,st.part[i][j]-1)*5 + W_PART*st.part[i][j]**2 + W_PART_P*st.part[i][j]*st.partP[i][j] + st.opp[i][j]**2 + W_OPP_P*st.opp[i][j]*st.oppP[i][j]; }
+  for(let i=0;i<st.n;i++) for(let j=i+1;j<st.n;j++){ if(st.fixed[i]===j) continue; s+=W_PART*Math.max(0,st.part[i][j]-1)*5 + W_PART*st.part[i][j]**2 + (W_PART_P+6*st.partP[i][j])*st.part[i][j]*st.partP[i][j] + st.opp[i][j]**2 + W_OPP_P*st.opp[i][j]*st.oppP[i][j]; }
   s+=(st.quadRep||0)*W_QUAD*3; // cùng 4 người gặp lại trong buổi
   if(st.R){ // mỗi người: số trận thắng KỲ VỌNG (theo trình 2 đội) ≈ ½ số trận → không ai bị xếp toàn kèo dưới / kèo trên
     const E=new Array(st.n).fill(0), G=new Array(st.n).fill(0);
