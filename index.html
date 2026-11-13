@@ -456,6 +456,8 @@ button.prow{width:100%;text-align:left;font:inherit;color:inherit}
 .cover td.zero{color:var(--lose);background:color-mix(in srgb,var(--lose) 8%,transparent);font-weight:800}.cover td[data-act]{cursor:pointer}
 .su-box summary{cursor:pointer;font-weight:800;font-size:14px}.su-box summary small{display:block;font-weight:600;color:var(--muted);font-size:12px;margin-top:2px}.su-box[open]{display:flex;flex-direction:column;gap:8px}
 .su-court{display:grid;grid-template-columns:minmax(0,1.3fr) 1fr auto 1fr;gap:6px;align-items:center}.su-court .inp{height:40px;padding:0 8px}
+.rank-mon{display:flex;align-items:center;gap:6px;margin:4px 0}.rank-mon select{height:38px;flex:1;text-align:center;font-weight:700}
+.rk-mv{display:block;font-size:11px;font-weight:800;margin-top:2px;white-space:nowrap}.rk-mv.up{color:var(--win)}.rk-mv.down{color:var(--lose)}.rk-mv.eq{color:var(--muted)}.rk-mv.new{color:#7A5AF8}
 .rp{display:flex;flex-direction:column;gap:10px}.rp h3{margin:6px 2px 0}.rp h3 small{font-weight:600;text-transform:none;letter-spacing:0}
 .rp-hero{position:relative;background:linear-gradient(135deg,#0E6A6A,#1C8C7A);color:#fff;border-radius:22px;padding:12px 12px 14px}
 .rp-hero .icon-btn{color:#fff}.rp-hero .icon-btn[disabled]{opacity:.3}.rp-x{position:absolute;top:6px;right:6px}
@@ -673,8 +675,8 @@ setTimeout(function(){if(!window.__SOPICK_END__){var v=document.getElementById('
 /* ====== CẤU HÌNH BẢN MOBILE ======
  * Dán link web app Apps Script (…/exec) vào giữa 2 dấu nháy dưới đây.
  * (Hoặc mở 1 lần: https://<tên>.github.io/<repo>/?api=<link …/exec> – app tự nhớ link trên máy đó.) */
-window.SOPICK_API = 'https://script.google.com/macros/s/AKfycbyuIeFGiIIJ1LQS4EX7gZfuE2P-8hqiSOVAjqoY4OBl7Om986RGBLXD8mILDHEy2LJk/exec';
-window.SOPICK_BUILD = '06/11/2026 14:50';
+window.SOPICK_API = 'https://script.google.com/macros/s/AKfycbwADPV7P0z5tdS3jotiILErF3HKfY1NQrREnBI9sKxDpyDWP0kqo1D0kILbKMumAFvt/exec';
+window.SOPICK_BUILD = '13/11/2026 09:24';
 (function(){ var FILE=window.SOPICK_API; window.SOPICK_FILE_API=FILE;
   try{ var q=new URLSearchParams(location.search).get('api');
     if(q&&/^https:\/\/script\.google\.com\/.+\/exec$/.test(q)){ localStorage.setItem('sopick_api',q); localStorage.setItem('sopick_api_base',FILE); history.replaceState(null,'',location.pathname); }
@@ -2024,19 +2026,21 @@ function viewH2H(){
 
 /* ---------- Bảng xếp hạng ---------- */
 const PERIODS=[['month','Tháng này'],['quarter','3 tháng'],['year','Năm nay'],['all','Tất cả']];
-function inPeriod(date,p){
+/** Tháng đang xem ở BXH (mặc định tháng này). */
+const rankMon=()=>S.rankM||curMonth();
+function inPeriod(date,p,mon){
   if(p==='all') return true;
   const d=pd(date), now=new Date();
-  if(p==='month') return d.getFullYear()===now.getFullYear()&&d.getMonth()===now.getMonth();
+  if(p==='month') return String(date).slice(0,7)===(mon||rankMon());
   if(p==='year') return d.getFullYear()===now.getFullYear();
   if(p==='quarter') return (now-d)/864e5<=92;
   return true;
 }
 /** Điểm xếp hạng = Thắng×3 + Thua×0 + Buổi tham dự×6 (chuyên cần = 2 trận thắng). Trận giao lưu không tính. Hòa điểm: nhiều trận thắng hơn → hiệu số điểm tốt hơn. */
 const RTYPES=[['all','Tổng'],['THANG','🗓 Buổi tháng'],['VL','🎟 Vãng lai']];
-function rankData(period,type){
+function rankData(period,type,mon){
   type=type||S.rankT||'all';
-  const sess={}; S.boot.sessions.filter(s=>s.doneCount&&!isTrial(s)&&inPeriod(s.date,period)&&(type==='all'||sessType(s)===type)).forEach(s=>sess[s.id]=s);
+  const sess={}; S.boot.sessions.filter(s=>s.doneCount&&!isTrial(s)&&inPeriod(s.date,period,mon)&&(type==='all'||sessType(s)===type)).forEach(s=>sess[s.id]=s);
   const P={}; const g=n=>P[n]||(P[n]={name:n,att:0,p:0,w:0,l:0,pf:0,pa:0,form:[],streak:0,best:0,ls:0,worst:0});
   Object.values(sess).forEach(s=>s.players.forEach(p=>g(p).att++));
   const pairs={};
@@ -2227,20 +2231,27 @@ const MEDAL=['gold','silver','bronze'];
 function viewRank(){
   if(!S.allMatches) return `<div class="empty glass"><span class="ms">emoji_events</span><b>Đang tính bảng xếp hạng…</b></div>`;
   const p=S.rankP||'all', t=S.rankT||'all', R=rankData(p,t), L=R.list;
+  const prevRank={}; if(p==='month'){ rankData('month',t,shiftMonth(rankMon(),-1)).list.forEach((x,i)=>prevRank[x.name]=i+1); }
+  const mv=(n,i)=>{ if(p!=='month') return ''; const pr=prevRank[n]; if(!pr) return Object.keys(prevRank).length?'<span class="rk-mv new">mới</span>':''; const d=pr-(i+1);
+    return d>0?`<span class="rk-mv up">▲${d}</span>`:d<0?`<span class="rk-mv down">▼${-d}</span>`:'<span class="rk-mv eq">–</span>'; };
   const seg=`<div class="seg rankseg">${RTYPES.map(([k,l])=>`<button data-act="rankT" data-v="${k}" class="${k===t?'on':''}">${l}</button>`).join('')}</div>
-    <div class="seg rankseg mini">${PERIODS.map(([k,l])=>`<button data-act="rankP" data-v="${k}" class="${k===p?'on':''}">${l}</button>`).join('')}</div>`;
+    <div class="seg rankseg mini">${PERIODS.map(([k,l])=>`<button data-act="rankP" data-v="${k}" class="${k===p?'on':''}">${l}</button>`).join('')}</div>
+    ${p==='month'?(()=>{ const ms=[...new Set(S.boot.sessions.filter(s=>s.doneCount&&!isTrial(s)).map(s=>s.date.slice(0,7)).concat([curMonth()]))].sort().reverse(), m=rankMon();
+      return `<div class="rank-mon"><button class="icon-btn" ${ms[ms.indexOf(m)+1]?`data-act="rankM" data-v="${ms[ms.indexOf(m)+1]}"`:'disabled'} aria-label="Tháng trước"><span class="ms">chevron_left</span></button>
+        <select class="inp" data-rankm aria-label="Chọn tháng">${ms.map(x=>`<option value="${x}" ${x===m?'selected':''}>Tháng ${monthLabel(x)}${x===curMonth()?' (tháng này)':''}</option>`).join('')}</select>
+        <button class="icon-btn" ${ms[ms.indexOf(m)-1]?`data-act="rankM" data-v="${ms[ms.indexOf(m)-1]}"`:'disabled'} aria-label="Tháng sau"><span class="ms">chevron_right</span></button></div>`; })():''}`;
   if(!L.length) return seg+`<div class="empty glass"><span class="ms">emoji_events</span><b>Chưa có trận nào trong khoảng này</b></div>`;
   const pod=[L[1],L[0],L[2]].map((x,i)=>{ if(!x) return '<div></div>'; const r=[2,1,3][i];
     return `<div class="pod p${r}">${r===1?'<span class="ms fill crown">workspace_premium</span>':''}${avatar(x.name,r===1?64:52)}
       <b>${esc(x.name)}</b><small>${x.pts} điểm</small><div class="step ${MEDAL[r-1]}"><span class="ms fill">emoji_events</span>${r}</div></div>`;}).join('');
   return seg+`
-  <section class="hero glass podium-wrap"><div class="eyebrow" style="text-align:center">Bảng xếp hạng ${t==='all'?'tổng':RTYPES.find(x=>x[0]===t)[1].replace(/^\S+ /,'').toLowerCase()} · ${PERIODS.find(x=>x[0]===p)[1].toLowerCase()} · ${R.sessions} buổi · ${R.matches} trận</div>
+  <section class="hero glass podium-wrap"><div class="eyebrow" style="text-align:center">Bảng xếp hạng ${p==='month'?'tháng '+monthLabel(rankMon())+' · ':''}${t==='all'?'tổng':RTYPES.find(x=>x[0]===t)[1].replace(/^\S+ /,'').toLowerCase()} · ${PERIODS.find(x=>x[0]===p)[1].toLowerCase()} · ${R.sessions} buổi · ${R.matches} trận</div>
     <div class="podium">${pod}</div></section>
   <div class="board glass">${L.map((x,i)=>`<button class="prow rk ${x.name===S.me?'me':''}" data-act="player" data-name="${esc(x.name)}">
     <span class="rank">${i<3?`<span class="medal ${MEDAL[i]}"><span class="ms fill">emoji_events</span></span>`:i+1}</span>${avatar(x.name)}
     <div class="pname">${esc(x.name)} <span class="form">${x.form.map(f=>`<i class="${f}">${f==='W'?'T':'B'}</i>`).join('')}</span>${nickTag(x)}
       <small>${x.att} buổi · ${x.p} trận · ${x.w}T–${x.l}B · ${Math.round(x.rate*100)}% · HS ${x.diff>0?'+':''}${x.diff}</small></div>
-    <span class="pts"><b>${x.pts}</b><small>điểm</small></span></button>`).join('')}</div>
+    <span class="pts"><b>${x.pts}</b><small>điểm</small>${mv(x.name,i)}</span></button>`).join('')}</div>
   <div class="sub" style="padding:0 6px">Cách tính: <b>Thắng 3đ · Thua 0đ (đã đóng tiền) · mỗi buổi có mặt 6đ</b> (chuyên cần = 2 trận thắng). Trận giao lưu chỉ tính đối đầu, không tính BXH. Bằng điểm thì xét số trận thắng, rồi hiệu số điểm. Chấm màu là 5 trận gần nhất (T thắng, B bại). Biệt hiệu vui (${Object.keys(NICKS).length} loại) tính theo chỉ số và <b>đổi mới mỗi ngày / sau mỗi trận</b>. Bấm vào tên để xem đánh cặp & đối đầu.</div>
   <h3>Danh hiệu</h3>
   <div class="awards">${R.awards.filter(a=>a[2]).map(([ic,t,x,f,isPair])=>`<div class="award glass"><span class="licon in"><span class="ms fill">${ic}</span></span><div class="pname">${t}<b>${esc(isPair?x.k:x.name)}</b><small>${f(x)}</small></div></div>`).join('')}</div>
@@ -3944,6 +3955,7 @@ const ACT={
   cntAdj(t){t.classList.toggle('on');},
   openCount:()=>openCount(),
   rankP(t){S.rankP=t.dataset.v;store.set('sopick_rankp',S.rankP);render();},
+  rankM(t){S.rankM=t.dataset.v;render();},
   rankT(t){S.rankT=t.dataset.v;render();},
   shareRank:()=>shareRank(),
   markPaid(t){needPin().then(pin=>call('api_setPaid',t.dataset.ids.split(','),true,pin,ensureMe())).then(b=>{S.boot=b;render();toast('Đã thu tiền '+t.dataset.name);}).catch(fail);},
@@ -3981,7 +3993,8 @@ document.addEventListener('click',e=>{
   a(t,e);
 });
 document.addEventListener('change',e=>{ if(e.target.dataset&&e.target.dataset.lgwho!==undefined){ S.lgWho=e.target.value; S.lgN=40; render(); }
-  if(e.target.dataset&&e.target.dataset.lgmon!==undefined){ S.lgMon=e.target.value; S.lgN=40; render(); } });
+  if(e.target.dataset&&e.target.dataset.lgmon!==undefined){ S.lgMon=e.target.value; S.lgN=40; render(); }
+  if(e.target.dataset&&e.target.dataset.rankm!==undefined){ S.rankM=e.target.value; render(); } });
 document.addEventListener('input',e=>{ if(e.target.id==='q'){ S.q=e.target.value; renderList(); }
   if(e.target.dataset&&e.target.dataset.cn!==undefined&&openCreate.F){ openCreate.F.courtNames[+e.target.dataset.cn]=e.target.value.trim()||('Sân '+(+e.target.dataset.cn+1)); }
   if(e.target.dataset&&e.target.dataset.filter){ const q=fold(e.target.value); document.querySelectorAll(e.target.dataset.filter+' [data-name]').forEach(el=>el.hidden=!!q&&!fold(el.dataset.name).includes(q)); }
